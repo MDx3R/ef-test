@@ -1,0 +1,18 @@
+env: "local"
+server:
+  port: "8080"
+  cors:
+    allow_headers:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+    expose_headers:
+      - X-Custom-Header
+    allow_credentials: true
+database:
+  driver: postgres
+  host: localhost
+  port: "5432"
+  username: postgres
+  password: password
+  database: test_db
