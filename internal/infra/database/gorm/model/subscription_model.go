@@ -11,9 +11,9 @@ type SubscriptionModel struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	ServiceName string
 	Price       int
-	UserID      uuid.UUID `gorm:"type:uuid;primaryKey"`
-	StartDate   time.Time
-	EndDate     *time.Time
+	UserID      uuid.UUID  `gorm:"type:uuid"`
+	StartDate   time.Time  `gorm:"type:date"`
+	EndDate     *time.Time `gorm:"type:date"`
 }
 
 func FromEntity(entity *entity.Subscription) SubscriptionModel {
