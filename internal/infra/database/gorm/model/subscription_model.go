@@ -1,0 +1,43 @@
+package gormmodel
+
+import (
+	"time"
+
+	"github.com/MDx3R/ef-test/internal/domain/entity"
+	"github.com/google/uuid"
+)
+
+type SubscriptionModel struct {
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ServiceName string
+	Price       int
+	UserID      uuid.UUID `gorm:"type:uuid;primaryKey"`
+	StartDate   time.Time
+	EndDate     *time.Time
+}
+
+func FromEntity(entity *entity.Subscription) SubscriptionModel {
+	return SubscriptionModel{
+		ID:          entity.ID(),
+		ServiceName: entity.ServiceName(),
+		Price:       entity.Price(),
+		UserID:      entity.UserID(),
+		StartDate:   entity.StartDate(),
+		EndDate:     entity.EndDate(),
+	}
+}
+
+func (m *SubscriptionModel) ToEntity() *entity.Subscription {
+	return entity.NewSubscriptionWithID(
+		m.ID,
+		m.ServiceName,
+		m.UserID,
+		m.Price,
+		m.StartDate,
+		m.EndDate,
+	)
+}
+
+func (SubscriptionModel) TableName() string {
+	return "subscriptions"
+}

@@ -71,3 +71,21 @@ func NewSubscription(
 		endDate:     endDate,
 	}
 }
+
+func NewSubscriptionWithID(
+	id uuid.UUID,
+	serviceName string,
+	userID uuid.UUID,
+	price int,
+	startDate time.Time,
+	endDate *time.Time,
+) *Subscription {
+	return &Subscription{
+		id:          id,
+		serviceName: serviceName,
+		price:       price,
+		userID:      userID,
+		startDate:   startDate,
+		endDate:     endDate,
+	}
+}

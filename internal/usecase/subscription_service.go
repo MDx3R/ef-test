@@ -12,7 +12,7 @@ type SubscriptionService interface {
 	CreateSubscription(request dto.CreateSubscriptionRequests) (uuid.UUID, error)
 	UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionRequests) error
 	DeleteSubscription(id uuid.UUID) error
-	CalculateTotalCost(filter dto.SubscriptionFilter) (int, error)
+	CalculateTotalCost(filter dto.TotalCostFilter) (int, error)
 }
 
 type subscriptionService struct {
@@ -88,6 +88,6 @@ func (s *subscriptionService) DeleteSubscription(id uuid.UUID) error {
 	return nil
 }
 
-func (s *subscriptionService) CalculateTotalCost(filter dto.SubscriptionFilter) (int, error) {
+func (s *subscriptionService) CalculateTotalCost(filter dto.TotalCostFilter) (int, error) {
 	return s.subRepo.CalculateTotalCost(filter)
 }

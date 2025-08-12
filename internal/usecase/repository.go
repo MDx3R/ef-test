@@ -12,5 +12,5 @@ type SubscriptionRepository interface {
 	Add(sub *entity.Subscription) error
 	Update(sub *entity.Subscription) error
 	Delete(id uuid.UUID) error
-	CalculateTotalCost(filter dto.SubscriptionFilter) (int, error)
+	CalculateTotalCost(filter dto.TotalCostFilter) (int, error)
 }
