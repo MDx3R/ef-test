@@ -9,7 +9,7 @@ import (
 type SubscriptionService interface {
 	GetSubscription(id uuid.UUID) (dto.SubscriptionResponse, error)
 	ListSubscriptions(filter SubscriptionFilter) ([]dto.SubscriptionResponse, error)
-	CreateSubscription(request dto.CreateSubscriptionRequests) error
+	CreateSubscription(request dto.CreateSubscriptionRequests) (uuid.UUID, error)
 	UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionRequests) error
 	DeleteSubscription(id uuid.UUID) error
 	CalculateTotalCost(filter SubscriptionFilter) (int, error)
@@ -45,14 +45,20 @@ func (s *subscriptionService) ListSubscriptions(filter SubscriptionFilter) ([]dt
 	return result, nil
 }
 
-func (s *subscriptionService) CreateSubscription(request dto.CreateSubscriptionRequests) error {
-	return s.subRepo.Add(entity.NewSubscription(
+func (s *subscriptionService) CreateSubscription(request dto.CreateSubscriptionRequests) (uuid.UUID, error) {
+	sub := entity.NewSubscription(
 		request.ServiceName,
 		request.UserID,
 		request.Price,
 		request.StartDate,
 		request.EndDate,
-	))
+	)
+
+	err := s.subRepo.Add(sub)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return sub.ID(), nil
 }
 
 func (s *subscriptionService) UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionRequests) error {
