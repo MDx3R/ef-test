@@ -8,11 +8,11 @@ import (
 
 type SubscriptionService interface {
 	GetSubscription(id uuid.UUID) (dto.SubscriptionResponse, error)
-	ListSubscriptions(filter SubscriptionFilter) ([]dto.SubscriptionResponse, error)
+	ListSubscriptions(filter dto.SubscriptionFilter) ([]dto.SubscriptionResponse, error)
 	CreateSubscription(request dto.CreateSubscriptionRequests) (uuid.UUID, error)
 	UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionRequests) error
 	DeleteSubscription(id uuid.UUID) error
-	CalculateTotalCost(filter SubscriptionFilter) (int, error)
+	CalculateTotalCost(filter dto.SubscriptionFilter) (int, error)
 }
 
 type subscriptionService struct {
@@ -31,7 +31,7 @@ func (s *subscriptionService) GetSubscription(id uuid.UUID) (dto.SubscriptionRes
 	return dto.FromSubscription(sub), nil
 }
 
-func (s *subscriptionService) ListSubscriptions(filter SubscriptionFilter) ([]dto.SubscriptionResponse, error) {
+func (s *subscriptionService) ListSubscriptions(filter dto.SubscriptionFilter) ([]dto.SubscriptionResponse, error) {
 	subs, err := s.subRepo.List(filter)
 	if err != nil {
 		return []dto.SubscriptionResponse{}, err
@@ -88,6 +88,6 @@ func (s *subscriptionService) DeleteSubscription(id uuid.UUID) error {
 	return nil
 }
 
-func (s *subscriptionService) CalculateTotalCost(filter SubscriptionFilter) (int, error) {
+func (s *subscriptionService) CalculateTotalCost(filter dto.SubscriptionFilter) (int, error) {
 	return s.subRepo.CalculateTotalCost(filter)
 }
