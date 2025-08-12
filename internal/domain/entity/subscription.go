@@ -7,11 +7,16 @@ import (
 )
 
 type Subscription struct {
+	id          uuid.UUID
 	serviceName string
 	price       int
 	userID      uuid.UUID
 	startDate   time.Time
 	endDate     *time.Time
+}
+
+func (s *Subscription) ID() uuid.UUID {
+	return s.id
 }
 
 func (s *Subscription) ServiceName() string {
@@ -30,8 +35,24 @@ func (s *Subscription) StartDate() time.Time {
 	return s.startDate
 }
 
-func (s *Subscription) EndDate() time.Time {
-	return *s.endDate
+func (s *Subscription) EndDate() *time.Time {
+	return s.endDate
+}
+
+func (s *Subscription) SetServiceName(serviceName string) {
+	s.serviceName = serviceName
+}
+
+func (s *Subscription) SetPrice(price int) {
+	s.price = price
+}
+
+func (s *Subscription) SetStartDate(startDate time.Time) {
+	s.startDate = startDate
+}
+
+func (s *Subscription) SetEndDate(endDate *time.Time) {
+	s.endDate = endDate
 }
 
 func NewSubscription(
@@ -42,6 +63,7 @@ func NewSubscription(
 	endDate *time.Time,
 ) *Subscription {
 	return &Subscription{
+		id:          uuid.New(),
 		serviceName: serviceName,
 		price:       price,
 		userID:      userID,
