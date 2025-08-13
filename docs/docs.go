@@ -142,7 +142,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/subscriptions/cost": {
+        "/subscriptions/total": {
             "get": {
                 "description": "Возвращает общую стоимость подписок по фильтру",
                 "produces": [

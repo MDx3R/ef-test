@@ -215,7 +215,7 @@ func (h *SubscriptionHandler) Update(ctx *gin.Context) {
 // @Success 200 {object} dto.IntResponse "Результат расчета стоимости"
 // @Failure 400 {object} dto.ErrorResponse "Ошибка валидации параметров запроса"
 // @Failure 500 {object} dto.ErrorResponse "Внутренняя ошибка сервера"
-// @Router /subscriptions/cost [get]
+// @Router /subscriptions/total [get]
 func (h *SubscriptionHandler) CalculateTotalCost(ctx *gin.Context) {
 	h.logger.Info("handling calculate total cost request")
 	var query dto.TotalCostQueryRequest
