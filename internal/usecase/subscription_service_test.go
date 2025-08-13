@@ -246,7 +246,7 @@ func TestSubscriptionService_CalculateTotalCost(t *testing.T) {
 	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
 	endDate := model.NewMonthYear(time.Date(2030, 9, 1, 0, 0, 0, 0, time.UTC))
 	filter := dto.TotalCostFilter{
-		UserID:      uuid.New(),
+		UserID:      uuid.New().String(),
 		ServiceName: "service_test",
 		PeriodStart: &startDate,
 		PeriodEnd:   &endDate,

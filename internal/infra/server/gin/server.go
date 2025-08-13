@@ -69,7 +69,7 @@ func (g *GinServer) RegisterSubscriptionHandler(handler *ginhandlers.Subscriptio
 	subGroup.POST("", handler.Create)
 	subGroup.PUT("/:id", handler.Update)
 	subGroup.DELETE("/:id", handler.Delete)
-	subGroup.GET("/total", handler.Delete)
+	subGroup.GET("/total", handler.CalculateTotalCost)
 }
 
 func (g *GinServer) Run() error {

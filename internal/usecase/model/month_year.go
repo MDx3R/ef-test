@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -44,13 +45,16 @@ func (my MonthYear) MarshalJSON() ([]byte, error) {
 }
 
 func (my *MonthYear) UnmarshalJSON(b []byte) error {
+	str := strings.Trim(string(b), `"`)
+	return my.UnmarshalText([]byte(str))
+}
+
+func (my *MonthYear) UnmarshalText(b []byte) error {
 	s := string(b)
-	if s == `null` || s == `""` {
+	if s == `` || s == `null` || s == `""` {
 		my.Time = time.Time{}
 		return nil
 	}
-
-	s = s[1 : len(s)-1]
 
 	t, err := time.Parse(monthYearLayout, s)
 	if err != nil {

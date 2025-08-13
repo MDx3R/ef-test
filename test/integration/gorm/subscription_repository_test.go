@@ -247,8 +247,9 @@ func TestGormSubscriptionRepository_List_FilterByUserID(t *testing.T) {
 	assert.NoError(t, repo.Add(sub1))
 	assert.NoError(t, repo.Add(sub2))
 
+	userID1Str := userID1.String()
 	filter := dto.SubscriptionFilter{
-		UserID:   &userID1,
+		UserID:   &userID1Str,
 		Page:     1,
 		PageSize: 10,
 	}
@@ -411,7 +412,7 @@ func TestGormSubscriptionRepository_CalculateTotalCost(t *testing.T) {
 	startDate := model.NewMonthYear(time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC))
 	endDate := model.NewMonthYear(time.Date(2025, 8, 31, 23, 59, 59, 0, time.UTC))
 	filter := dto.TotalCostFilter{
-		UserID:      userID,
+		UserID:      userID.String(),
 		ServiceName: "serviceA",
 		PeriodStart: &startDate,
 		PeriodEnd:   &endDate,

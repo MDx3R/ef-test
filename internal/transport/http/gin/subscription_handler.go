@@ -103,6 +103,23 @@ func (h *SubscriptionHandler) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusNoContent, gin.H{})
 }
 
+func (h *SubscriptionHandler) CalculateTotalCost(ctx *gin.Context) {
+	var request dto.TotalCostFilter
+
+	if err := ctx.ShouldBindQuery(&request); err != nil {
+		h.handleValidationError(ctx, err)
+		return
+	}
+
+	result, err := h.subService.CalculateTotalCost(request)
+	if err != nil {
+		h.handleServiceError(ctx, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.IntResponse{Value: result})
+}
+
 func (h *SubscriptionHandler) parseUUIDParam(ctx *gin.Context, param string) (uuid.UUID, bool) {
 	idStr := ctx.Param(param)
 	id, err := uuid.Parse(idStr)

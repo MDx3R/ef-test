@@ -32,7 +32,7 @@ func setupRouterAndHandler(t *testing.T) (*gin.Engine, *mock_usecase.MockSubscri
 	r.POST("", handler.Create)
 	r.PUT("/:id", handler.Update)
 	r.DELETE("/:id", handler.Delete)
-	r.GET("/total", handler.Delete)
+	r.GET("/total", handler.CalculateTotalCost)
 
 	return r, mockService
 }
@@ -456,6 +456,71 @@ func TestSubscriptionHandler_Delete_ServiceError(t *testing.T) {
 
 	router.ServeHTTP(w, req)
 
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	mockService.AssertExpectations(t)
+}
+
+func TestSubscriptionHandler_TotalCost_Success(t *testing.T) {
+	router, mockService := setupRouterAndHandler(t)
+
+	userID := uuid.New()
+	periodStart := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
+	periodEnd := model.NewMonthYear(time.Date(2025, 10, 1, 0, 0, 0, 0, time.UTC))
+	request := dto.TotalCostFilter{
+		UserID:      userID.String(),
+		ServiceName: "test_service",
+		PeriodStart: &periodStart,
+		PeriodEnd:   &periodEnd,
+	}
+
+	query := fmt.Sprintf(
+		`/total?user_id=%s&service_name=%s&period_start="08-2025"&period_end="10-2025"`,
+		userID.String(),
+		"test_service",
+	)
+
+	mockService.On(
+		"CalculateTotalCost",
+		request,
+	).Return(150, nil)
+
+	req := httptest.NewRequest(http.MethodGet, query, nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "150")
+	mockService.AssertExpectations(t)
+}
+
+func TestSubscriptionHandler_TotalCost_ServiceError(t *testing.T) {
+	router, mockService := setupRouterAndHandler(t)
+
+	userID := uuid.New()
+	periodStart := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
+	periodEnd := model.NewMonthYear(time.Date(2025, 10, 1, 0, 0, 0, 0, time.UTC))
+	request := dto.TotalCostFilter{
+		UserID:      userID.String(),
+		ServiceName: "test_service",
+		PeriodStart: &periodStart,
+		PeriodEnd:   &periodEnd,
+	}
+
+	query := fmt.Sprintf(
+		`/total?user_id=%s&service_name=%s&period_start="08-2025"&period_end="10-2025"`,
+		userID.String(),
+		"test_service",
+	)
+
+	mockService.On(
+		"CalculateTotalCost",
+		request,
+	).Return(0, errors.New("service failure"))
+
+	req := httptest.NewRequest(http.MethodGet, query, nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	mockService.AssertExpectations(t)
 }

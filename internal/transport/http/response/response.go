@@ -6,6 +6,10 @@ type IDResponse struct {
 	ID uuid.UUID `json:"id"`
 }
 
+type IntResponse struct {
+	Value int `json:"value"`
+}
+
 type ErrorResponse struct {
 	Error string `json:"error" example:"error message"`
 }

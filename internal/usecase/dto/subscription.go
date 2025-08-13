@@ -31,7 +31,8 @@ type UpdateSubscriptionRequests struct {
 }
 
 type SubscriptionFilter struct {
-	UserID      *uuid.UUID       `form:"user_id"`
+	// uuid.UUID type not supported for form
+	UserID      *string          `form:"user_id" binding:"omitempty,uuid"`
 	ServiceName *string          `form:"service_name"`
 	StartDate   *model.MonthYear `form:"start_date"`
 	EndDate     *model.MonthYear `form:"end_date"`
@@ -41,7 +42,8 @@ type SubscriptionFilter struct {
 }
 
 type TotalCostFilter struct {
-	UserID      uuid.UUID        `form:"user_id" binding:"required"`
+	// uuid.UUID type not supported for form
+	UserID      string           `form:"user_id" binding:"required,uuid"`
 	ServiceName string           `form:"service_name" binding:"required"`
 	PeriodStart *model.MonthYear `form:"period_start" binding:"required"`
 	PeriodEnd   *model.MonthYear `form:"period_end" binding:"required"`
