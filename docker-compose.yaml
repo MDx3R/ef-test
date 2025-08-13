@@ -13,3 +13,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  go-service:
+    build: .
+    restart: on-failure:5
+    ports:
+      - "${GO_SERVICE_PORT}:8080"
+    env_file: .env
+    volumes:
+      - ./configs:/app/configs
+      - ./migrations:/app/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
