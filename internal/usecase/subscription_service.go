@@ -48,16 +48,18 @@ func (s *subscriptionService) ListSubscriptions(filter dto.SubscriptionFilter) (
 }
 
 func (s *subscriptionService) CreateSubscription(request dto.CreateSubscriptionRequests) (uuid.UUID, error) {
-	sub := entity.NewSubscription(
+	sub, err := entity.NewSubscription(
 		request.ServiceName,
 		request.UserID,
 		request.Price,
 		request.StartDate.ToTime(),
 		request.EndDate.ToTimePtr(),
 	)
-
-	err := s.subRepo.Add(sub)
 	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if err := s.subRepo.Add(sub); err != nil {
 		return uuid.Nil, err
 	}
 	return sub.ID(), nil
@@ -71,11 +73,11 @@ func (s *subscriptionService) UpdateSubscription(id uuid.UUID, request dto.Updat
 
 	sub.SetServiceName(request.ServiceName)
 	sub.SetPrice(request.Price)
-	sub.SetStartDate(request.StartDate.ToTime())
-	sub.SetEndDate(request.EndDate.ToTimePtr())
+	if err := sub.SetStartEndDate(request.StartDate.ToTime(), request.EndDate.ToTimePtr()); err != nil {
+		return err
+	}
 
-	err = s.subRepo.Update(sub)
-	if err != nil {
+	if err := s.subRepo.Update(sub); err != nil {
 		return err
 	}
 

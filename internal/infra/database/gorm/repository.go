@@ -20,9 +20,9 @@ func NewGormSubscriptionRepository(db *gorm.DB) usecase.SubscriptionRepository {
 }
 
 func (r *gormSubscriptionRepository) Get(id uuid.UUID) (*entity.Subscription, error) {
-	var sub gormmodel.SubscriptionModel
+	var model gormmodel.SubscriptionModel
 
-	err := r.tx.First(&sub, "id = ?", id).Error
+	err := r.tx.First(&model, "id = ?", id).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, usecase.ErrNotFound
@@ -30,7 +30,12 @@ func (r *gormSubscriptionRepository) Get(id uuid.UUID) (*entity.Subscription, er
 		return nil, wrap(usecase.ErrRepository, err)
 	}
 
-	return sub.ToEntity(), nil
+	sub, err := model.ToEntity()
+	if err != nil {
+		return nil, wrap(usecase.ErrRepository, err)
+	}
+
+	return sub, nil
 }
 func (r *gormSubscriptionRepository) List(filter dto.SubscriptionFilter) ([]*entity.Subscription, error) {
 	var subs []gormmodel.SubscriptionModel
@@ -57,8 +62,13 @@ func (r *gormSubscriptionRepository) List(filter dto.SubscriptionFilter) ([]*ent
 	}
 
 	result := make([]*entity.Subscription, len(subs))
-	for i, sub := range subs {
-		result[i] = sub.ToEntity()
+	for i, model := range subs {
+		sub, err := model.ToEntity()
+		if err != nil {
+			return nil, wrap(usecase.ErrRepository, err)
+		}
+
+		result[i] = sub
 	}
 
 	return result, nil

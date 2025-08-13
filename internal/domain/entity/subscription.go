@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 
+	"github.com/MDx3R/ef-test/internal/domain"
 	"github.com/google/uuid"
 )
 
@@ -47,12 +48,32 @@ func (s *Subscription) SetPrice(price int) {
 	s.price = price
 }
 
-func (s *Subscription) SetStartDate(startDate time.Time) {
+func (s *Subscription) SetStartDate(startDate time.Time) error {
+	if err := validateTime(startDate, s.endDate); err != nil {
+		return err
+	}
+
 	s.startDate = startDate
+	return nil
 }
 
-func (s *Subscription) SetEndDate(endDate *time.Time) {
+func (s *Subscription) SetEndDate(endDate *time.Time) error {
+	if err := validateTime(s.startDate, endDate); err != nil {
+		return err
+	}
+
 	s.endDate = endDate
+	return nil
+}
+
+func (s *Subscription) SetStartEndDate(startDate time.Time, endDate *time.Time) error {
+	if err := validateTime(startDate, endDate); err != nil {
+		return err
+	}
+
+	s.startDate = startDate
+	s.endDate = endDate
+	return nil
 }
 
 func NewSubscription(
@@ -61,7 +82,11 @@ func NewSubscription(
 	price int,
 	startDate time.Time,
 	endDate *time.Time,
-) *Subscription {
+) (*Subscription, error) {
+	if err := validateTime(startDate, endDate); err != nil {
+		return nil, err
+	}
+
 	return &Subscription{
 		id:          uuid.New(),
 		serviceName: serviceName,
@@ -69,7 +94,7 @@ func NewSubscription(
 		userID:      userID,
 		startDate:   startDate,
 		endDate:     endDate,
-	}
+	}, nil
 }
 
 func NewSubscriptionWithID(
@@ -79,7 +104,11 @@ func NewSubscriptionWithID(
 	price int,
 	startDate time.Time,
 	endDate *time.Time,
-) *Subscription {
+) (*Subscription, error) {
+	if err := validateTime(startDate, endDate); err != nil {
+		return nil, err
+	}
+
 	return &Subscription{
 		id:          id,
 		serviceName: serviceName,
@@ -87,5 +116,12 @@ func NewSubscriptionWithID(
 		userID:      userID,
 		startDate:   startDate,
 		endDate:     endDate,
+	}, nil
+}
+
+func validateTime(startDate time.Time, endDate *time.Time) error {
+	if endDate != nil && startDate.After(*endDate) {
+		return domain.ErrInvalidPeriod
 	}
+	return nil
 }

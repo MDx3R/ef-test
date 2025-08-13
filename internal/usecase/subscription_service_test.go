@@ -22,7 +22,7 @@ func setupSubscriptionService(t *testing.T) (*mock_usecase.MockSubscriptionRepos
 
 func makeTestSubscription(t *testing.T) *entity.Subscription {
 	id := uuid.New()
-	return entity.NewSubscriptionWithID(
+	sub, _ := entity.NewSubscriptionWithID(
 		id,
 		"test_service",
 		uuid.New(),
@@ -30,6 +30,8 @@ func makeTestSubscription(t *testing.T) *entity.Subscription {
 		time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC),
 		nil,
 	)
+
+	return sub
 }
 
 func TestSubscriptionService_GetSubscription(t *testing.T) {
@@ -145,7 +147,7 @@ func TestSubscriptionService_UpdateSubscriptions(t *testing.T) {
 	req := dto.UpdateSubscriptionRequests{
 		ServiceName: "updated_name",
 		Price:       150,
-		StartDate:   model.NewMonthYear(time.Date(2030, 9, 1, 0, 0, 0, 0, time.UTC)),
+		StartDate:   model.NewMonthYear(time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC)),
 		EndDate:     &endDate,
 	}
 
@@ -155,7 +157,7 @@ func TestSubscriptionService_UpdateSubscriptions(t *testing.T) {
 			u.ServiceName() == req.ServiceName &&
 			u.UserID() == sub.UserID() &&
 			time.Time.Equal(u.StartDate(), req.StartDate.ToTime()) &&
-			*u.EndDate() == req.EndDate.ToTime())
+			time.Time.Equal(*u.EndDate(), req.EndDate.ToTime()))
 	})).Return(nil)
 
 	err := service.UpdateSubscription(id, req)

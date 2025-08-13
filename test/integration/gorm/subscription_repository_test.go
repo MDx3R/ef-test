@@ -106,7 +106,7 @@ func clearTable(t *testing.T) {
 
 func makeTestSubscription(t *testing.T) *entity.Subscription {
 	id := uuid.New()
-	return entity.NewSubscriptionWithID(
+	sub, _ := entity.NewSubscriptionWithID(
 		id,
 		"test_service",
 		uuid.New(),
@@ -114,6 +114,7 @@ func makeTestSubscription(t *testing.T) *entity.Subscription {
 		time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC),
 		nil,
 	)
+	return sub
 }
 
 func timePtr(t time.Time) *time.Time {
@@ -240,8 +241,8 @@ func TestGormSubscriptionRepository_List_FilterByUserID(t *testing.T) {
 	userID1 := uuid.New()
 	userID2 := uuid.New()
 
-	sub1 := entity.NewSubscriptionWithID(uuid.New(), "service1", userID1, 50, time.Now(), nil)
-	sub2 := entity.NewSubscriptionWithID(uuid.New(), "service2", userID2, 100, time.Now(), nil)
+	sub1, _ := entity.NewSubscriptionWithID(uuid.New(), "service1", userID1, 50, time.Now(), nil)
+	sub2, _ := entity.NewSubscriptionWithID(uuid.New(), "service2", userID2, 100, time.Now(), nil)
 
 	assert.NoError(t, repo.Add(sub1))
 	assert.NoError(t, repo.Add(sub2))
@@ -265,8 +266,8 @@ func TestGormSubscriptionRepository_List_FilterByServiceName(t *testing.T) {
 	clearTable(t)
 
 	// Arrange
-	sub1 := entity.NewSubscriptionWithID(uuid.New(), "serviceA", uuid.New(), 50, time.Now(), nil)
-	sub2 := entity.NewSubscriptionWithID(uuid.New(), "serviceB", uuid.New(), 100, time.Now(), nil)
+	sub1, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceA", uuid.New(), 50, time.Now(), nil)
+	sub2, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceB", uuid.New(), 100, time.Now(), nil)
 
 	assert.NoError(t, repo.Add(sub1))
 	assert.NoError(t, repo.Add(sub2))
@@ -295,13 +296,13 @@ func TestSubscriptionRepository_List_FilterDates(t *testing.T) {
 	endDate := model.NewMonthYear(time.Date(2025, 8, 31, 23, 59, 59, 0, time.UTC))
 
 	// 1. start_date: 2025-07-01, end_date: NULL
-	sub1 := entity.NewSubscriptionWithID(uuid.New(), "serviceA", uuid.New(), 100, time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC), nil)
+	sub1, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceA", uuid.New(), 100, time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC), nil)
 
 	// 2. start_date: 2025-08-05, end_date: 2025-08-20
-	sub2 := entity.NewSubscriptionWithID(uuid.New(), "serviceA", uuid.New(), 150, time.Date(2025, 8, 5, 0, 0, 0, 0, time.UTC), timePtr(time.Date(2025, 8, 20, 0, 0, 0, 0, time.UTC)))
+	sub2, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceA", uuid.New(), 150, time.Date(2025, 8, 5, 0, 0, 0, 0, time.UTC), timePtr(time.Date(2025, 8, 20, 0, 0, 0, 0, time.UTC)))
 
 	// 3. start_date: 2025-08-15, end_date: 2025-09-01
-	sub3 := entity.NewSubscriptionWithID(uuid.New(), "serviceB", uuid.New(), 200, time.Date(2025, 8, 15, 0, 0, 0, 0, time.UTC), timePtr(time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC)))
+	sub3, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceB", uuid.New(), 200, time.Date(2025, 8, 15, 0, 0, 0, 0, time.UTC), timePtr(time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC)))
 
 	for _, s := range []*entity.Subscription{sub1, sub2, sub3} {
 		assert.NoError(t, repo.Add(s))
@@ -399,9 +400,9 @@ func TestGormSubscriptionRepository_CalculateTotalCost(t *testing.T) {
 
 	// Arrange
 	userID := uuid.New()
-	sub1 := entity.NewSubscriptionWithID(uuid.New(), "serviceA", userID, 100, time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC), nil)
-	sub2 := entity.NewSubscriptionWithID(uuid.New(), "serviceA", userID, 150, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), nil)
-	sub3 := entity.NewSubscriptionWithID(uuid.New(), "serviceB", userID, 200, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), nil)
+	sub1, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceA", userID, 100, time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC), nil)
+	sub2, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceA", userID, 150, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), nil)
+	sub3, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceB", userID, 200, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), nil)
 
 	assert.NoError(t, repo.Add(sub1))
 	assert.NoError(t, repo.Add(sub2))

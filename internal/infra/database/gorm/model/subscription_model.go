@@ -27,8 +27,8 @@ func FromEntity(entity *entity.Subscription) SubscriptionModel {
 	}
 }
 
-func (m *SubscriptionModel) ToEntity() *entity.Subscription {
-	return entity.NewSubscriptionWithID(
+func (m *SubscriptionModel) ToEntity() (*entity.Subscription, error) {
+	sub, err := entity.NewSubscriptionWithID(
 		m.ID,
 		m.ServiceName,
 		m.UserID,
@@ -36,6 +36,11 @@ func (m *SubscriptionModel) ToEntity() *entity.Subscription {
 		m.StartDate,
 		m.EndDate,
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	return sub, nil
 }
 
 func (SubscriptionModel) TableName() string {
