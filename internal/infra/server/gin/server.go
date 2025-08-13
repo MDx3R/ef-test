@@ -62,14 +62,14 @@ func (g *GinServer) UseMiddleware(mw ...gin.HandlerFunc) {
 }
 
 func (g *GinServer) RegisterSubscriptionHandler(handler *ginhandlers.SubscriptionHandler) {
-	userGroup := g.engine.Group("/subscription")
+	subGroup := g.engine.Group("/subscription")
 
-	userGroup.GET("", handler.List)
-	userGroup.GET("/:id", handler.Get)
-	userGroup.POST("", handler.Create)
-	userGroup.PUT("/:id", handler.Update)
-	userGroup.DELETE("/:id", handler.Delete)
-	userGroup.GET("/total", handler.Delete)
+	subGroup.GET("", handler.List)
+	subGroup.GET("/:id", handler.Get)
+	subGroup.POST("", handler.Create)
+	subGroup.PUT("/:id", handler.Update)
+	subGroup.DELETE("/:id", handler.Delete)
+	subGroup.GET("/total", handler.Delete)
 }
 
 func (g *GinServer) Run() error {
