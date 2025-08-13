@@ -6,9 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	_ "github.com/MDx3R/ef-test/docs"
+
 	"github.com/MDx3R/ef-test/internal/config"
 	ginhandlers "github.com/MDx3R/ef-test/internal/transport/http/gin"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type GinServer struct {
@@ -61,8 +65,12 @@ func (g *GinServer) UseMiddleware(mw ...gin.HandlerFunc) {
 	g.engine.Use(mw...)
 }
 
+func (g *GinServer) RegisterSwagger() {
+	g.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+}
+
 func (g *GinServer) RegisterSubscriptionHandler(handler *ginhandlers.SubscriptionHandler) {
-	subGroup := g.engine.Group("/subscription")
+	subGroup := g.engine.Group("/subscriptions")
 
 	subGroup.GET("", handler.List)
 	subGroup.GET("/:id", handler.Get)

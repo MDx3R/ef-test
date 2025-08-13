@@ -1,0 +1,298 @@
+basePath: /
+definitions:
+  dto.CreateSubscriptionRequests:
+    properties:
+      end_date:
+        $ref: '#/definitions/model.MonthYear'
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        $ref: '#/definitions/model.MonthYear'
+      user_id:
+        type: string
+    required:
+    - price
+    - service_name
+    - start_date
+    - user_id
+    type: object
+  dto.SubscriptionResponse:
+    properties:
+      end_date:
+        $ref: '#/definitions/model.MonthYear'
+      id:
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        $ref: '#/definitions/model.MonthYear'
+      user_id:
+        type: string
+    type: object
+  dto.UpdateSubscriptionRequests:
+    properties:
+      end_date:
+        $ref: '#/definitions/model.MonthYear'
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        $ref: '#/definitions/model.MonthYear'
+    required:
+    - price
+    - service_name
+    - start_date
+    type: object
+  model.MonthYear:
+    properties:
+      time.Time:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      error:
+        example: error message
+        type: string
+    type: object
+  response.IDResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  response.IntResponse:
+    properties:
+      value:
+        type: integer
+    type: object
+  response.ValidationErrorResponse:
+    properties:
+      error:
+        example: validation error
+        type: string
+      fields:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: |-
+    REST API для хранения и обработки информации об онлайн-подписках пользователей.
+    Сервис позволяет добавлять, изменять, удалять и просматривать записи о подписках, а также рассчитывать суммарную стоимость подписок за выбранный период.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Effective Mobile GO - Subscription Service API
+  version: "1.0"
+paths:
+  /subscriptions:
+    get:
+      description: Возвращает список подписок с фильтрацией по параметрам
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: page_size
+        type: integer
+      - in: query
+        name: service_name
+        type: string
+      - description: uuid.UUID type not supported for form
+        in: query
+        name: user_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.SubscriptionResponse'
+            type: array
+        "400":
+          description: Ошибка валидации параметров запроса
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Список подписок
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Создает новую подписку с данными из JSON
+      parameters:
+      - description: Данные новой подписки
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateSubscriptionRequests'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ID созданной подписки
+          schema:
+            $ref: '#/definitions/response.IDResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "422":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/response.ValidationErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Создать подписку
+      tags:
+      - subscriptions
+  /subscriptions/{id}:
+    delete:
+      description: Удаляет подписку по UUID
+      parameters:
+      - description: Subscription ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Подписка удалена
+        "400":
+          description: Неверный UUID
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Подписка не найдена
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Удалить подписку по ID
+      tags:
+      - subscriptions
+    get:
+      description: Возвращает подписку по заданному UUID
+      parameters:
+      - description: Subscription ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Подписка найдена
+          schema:
+            $ref: '#/definitions/dto.SubscriptionResponse'
+        "400":
+          description: Неверный UUID
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Подписка не найдена
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Получить подписку по ID
+      tags:
+      - subscriptions
+    put:
+      consumes:
+      - application/json
+      description: Обновляет подписку по UUID с данными из JSON
+      parameters:
+      - description: Subscription ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные обновления подписки
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSubscriptionRequests'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Подписка обновлена
+        "400":
+          description: Неверный UUID или данные запроса
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Подписка не найдена
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "422":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/response.ValidationErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Обновить подписку
+      tags:
+      - subscriptions
+  /subscriptions/cost:
+    get:
+      description: Возвращает общую стоимость подписок по фильтру
+      parameters:
+      - in: query
+        name: service_name
+        required: true
+        type: string
+      - description: uuid.UUID type not supported for form
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Результат расчета стоимости
+          schema:
+            $ref: '#/definitions/response.IntResponse'
+        "400":
+          description: Ошибка валидации параметров запроса
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Рассчитать общую стоимость подписок
+      tags:
+      - subscriptions
+swagger: "2.0"
+tags:
+- description: Операции с подписками пользователей
+  name: subscriptions

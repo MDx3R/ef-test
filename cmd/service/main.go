@@ -12,6 +12,20 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// @title Effective Mobile GO - Subscription Service API
+// @version 1.0
+// @description REST API для хранения и обработки информации об онлайн-подписках пользователей.
+// @description Сервис позволяет добавлять, изменять, удалять и просматривать записи о подписках, а также рассчитывать суммарную стоимость подписок за выбранный период.
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /
+
+// @tag.name subscriptions
+// @tag.description Операции с подписками пользователей
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {

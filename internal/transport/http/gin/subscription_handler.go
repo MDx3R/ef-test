@@ -17,6 +17,17 @@ type SubscriptionHandler struct {
 	subService usecase.SubscriptionService
 }
 
+// Get godoc
+// @Summary Получить подписку по ID
+// @Description Возвращает подписку по заданному UUID
+// @Tags subscriptions
+// @Param id path string true "Subscription ID" Format(uuid)
+// @Produce json
+// @Success 200 {object} dto.SubscriptionResponse "Подписка найдена"
+// @Failure 400 {object} response.ErrorResponse "Неверный UUID"
+// @Failure 404 {object} response.ErrorResponse "Подписка не найдена"
+// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /subscriptions/{id} [get]
 func (h *SubscriptionHandler) Get(ctx *gin.Context) {
 	id, ok := h.parseUUIDParam(ctx, "id")
 	if !ok {
@@ -32,6 +43,16 @@ func (h *SubscriptionHandler) Get(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, sub)
 }
 
+// List godoc
+// @Summary Список подписок
+// @Description Возвращает список подписок с фильтрацией по параметрам
+// @Tags subscriptions
+// @Produce json
+// @Param filter query dto.SubscriptionFilter false "Фильтры подписок"
+// @Success 200 {array} dto.SubscriptionResponse
+// @Failure 400 {object} response.ErrorResponse "Ошибка валидации параметров запроса"
+// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /subscriptions [get]
 func (h *SubscriptionHandler) List(ctx *gin.Context) {
 	var filter dto.SubscriptionFilter
 
@@ -49,6 +70,16 @@ func (h *SubscriptionHandler) List(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, subs)
 }
 
+// Delete godoc
+// @Summary Удалить подписку по ID
+// @Description Удаляет подписку по UUID
+// @Tags subscriptions
+// @Param id path string true "Subscription ID" Format(uuid)
+// @Success 204 "Подписка удалена"
+// @Failure 400 {object} response.ErrorResponse "Неверный UUID"
+// @Failure 404 {object} response.ErrorResponse "Подписка не найдена"
+// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /subscriptions/{id} [delete]
 func (h *SubscriptionHandler) Delete(ctx *gin.Context) {
 	id, ok := h.parseUUIDParam(ctx, "id")
 	if !ok {
@@ -64,6 +95,18 @@ func (h *SubscriptionHandler) Delete(ctx *gin.Context) {
 	ctx.JSON(http.StatusNoContent, gin.H{})
 }
 
+// Create godoc
+// @Summary Создать подписку
+// @Description Создает новую подписку с данными из JSON
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param subscription body dto.CreateSubscriptionRequests true "Данные новой подписки"
+// @Success 201 {object} response.IDResponse "ID созданной подписки"
+// @Failure 400 {object} response.ErrorResponse "Неверный запрос"
+// @Failure 422 {object} response.ValidationErrorResponse "Ошибка валидации"
+// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /subscriptions [post]
 func (h *SubscriptionHandler) Create(ctx *gin.Context) {
 	var request dto.CreateSubscriptionRequests
 
@@ -81,6 +124,20 @@ func (h *SubscriptionHandler) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, response.IDResponse{ID: id})
 }
 
+// Update godoc
+// @Summary Обновить подписку
+// @Description Обновляет подписку по UUID с данными из JSON
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param id path string true "Subscription ID" Format(uuid)
+// @Param subscription body dto.UpdateSubscriptionRequests true "Данные обновления подписки"
+// @Success 204 "Подписка обновлена"
+// @Failure 400 {object} response.ErrorResponse "Неверный UUID или данные запроса"
+// @Failure 422 {object} response.ValidationErrorResponse "Ошибка валидации"
+// @Failure 404 {object} response.ErrorResponse "Подписка не найдена"
+// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /subscriptions/{id} [put]
 func (h *SubscriptionHandler) Update(ctx *gin.Context) {
 	var request dto.UpdateSubscriptionRequests
 
@@ -103,6 +160,16 @@ func (h *SubscriptionHandler) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusNoContent, gin.H{})
 }
 
+// CalculateTotalCost godoc
+// @Summary Рассчитать общую стоимость подписок
+// @Description Возвращает общую стоимость подписок по фильтру
+// @Tags subscriptions
+// @Produce json
+// @Param filter query dto.TotalCostFilter true "Фильтр для расчета стоимости"
+// @Success 200 {object} response.IntResponse "Результат расчета стоимости"
+// @Failure 400 {object} response.ErrorResponse "Ошибка валидации параметров запроса"
+// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /subscriptions/cost [get]
 func (h *SubscriptionHandler) CalculateTotalCost(ctx *gin.Context) {
 	var request dto.TotalCostFilter
 
