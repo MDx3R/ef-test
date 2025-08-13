@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/MDx3R/ef-test/internal/domain/entity"
 	"github.com/MDx3R/ef-test/internal/usecase/dto"
 	"github.com/google/uuid"
@@ -26,7 +28,7 @@ func NewSubscriptionService(subRepo SubscriptionRepository) SubscriptionService 
 func (s *subscriptionService) GetSubscription(id uuid.UUID) (dto.SubscriptionResponse, error) {
 	sub, err := s.subRepo.Get(id)
 	if err != nil {
-		return dto.SubscriptionResponse{}, nil
+		return dto.SubscriptionResponse{}, err
 	}
 	return dto.FromSubscription(sub), nil
 }
@@ -82,7 +84,7 @@ func (s *subscriptionService) UpdateSubscription(id uuid.UUID, request dto.Updat
 
 func (s *subscriptionService) DeleteSubscription(id uuid.UUID) error {
 	err := s.subRepo.Delete(id)
-	if err != nil {
+	if err != nil && !errors.Is(err, ErrNotFound) {
 		return err
 	}
 	return nil
