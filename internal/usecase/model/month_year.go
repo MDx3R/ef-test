@@ -9,7 +9,32 @@ type MonthYear struct {
 	time.Time
 }
 
+func NewMonthYear(t time.Time) MonthYear {
+	return MonthYear{Time: t}
+}
+
+func NewMonthYearFromPtr(t *time.Time) *MonthYear {
+	if t == nil {
+		return nil
+	}
+	return &MonthYear{Time: *t}
+}
+
 const monthYearLayout = "01-2006"
+
+func (m *MonthYear) ToTime() time.Time {
+	if m == nil {
+		return time.Time{}
+	}
+	return m.Time
+}
+
+func (m *MonthYear) ToTimePtr() *time.Time {
+	if m == nil {
+		return nil
+	}
+	return &m.Time
+}
 
 func (my MonthYear) MarshalJSON() ([]byte, error) {
 	if my.Time.IsZero() {

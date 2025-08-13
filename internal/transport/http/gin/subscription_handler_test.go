@@ -12,6 +12,7 @@ import (
 	"github.com/MDx3R/ef-test/internal/usecase"
 	"github.com/MDx3R/ef-test/internal/usecase/dto"
 	mock_usecase "github.com/MDx3R/ef-test/internal/usecase/mocks"
+	"github.com/MDx3R/ef-test/internal/usecase/model"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -41,7 +42,7 @@ func makeTestSubscriptionResponse(t *testing.T) dto.SubscriptionResponse {
 		ServiceName: "test_service",
 		Price:       100,
 		UserID:      uuid.New(),
-		StartDate:   time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC),
+		StartDate:   model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)),
 		EndDate:     nil,
 	}
 }
@@ -129,16 +130,15 @@ func TestSubscriptionHandler_Create_Success(t *testing.T) {
 		ServiceName: "test_service",
 		Price:       100,
 		UserID:      uuid.New(),
-		StartDate:   time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC),
+		StartDate:   model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)),
 		EndDate:     nil,
 	}
 
 	jsonBody := fmt.Sprintf(
-		`{"service_name":"%v", "price":%v, "user_id":"%v", "start_date":"%v"}`,
+		`{"service_name":"%v", "price":%v, "user_id":"%v", "start_date":"08-2025"}`,
 		request.ServiceName,
 		request.Price,
 		request.UserID,
-		request.StartDate.Format(time.RFC3339),
 	)
 
 	newID := uuid.New()
@@ -179,15 +179,14 @@ func TestSubscriptionHandler_Update_Success(t *testing.T) {
 	request := dto.UpdateSubscriptionRequests{
 		ServiceName: "test_service",
 		Price:       100,
-		StartDate:   time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC),
+		StartDate:   model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)),
 		EndDate:     nil,
 	}
 
 	jsonBody := fmt.Sprintf(
-		`{"service_name":"%v", "price":%v, "start_date":"%v"}`,
+		`{"service_name":"%v", "price":%v, "start_date":"08-2025"}`,
 		request.ServiceName,
 		request.Price,
-		request.StartDate.Format(time.RFC3339),
 	)
 
 	mockService.On("UpdateSubscription", id, request).Return(nil)

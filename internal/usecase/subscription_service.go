@@ -52,8 +52,8 @@ func (s *subscriptionService) CreateSubscription(request dto.CreateSubscriptionR
 		request.ServiceName,
 		request.UserID,
 		request.Price,
-		request.StartDate,
-		request.EndDate,
+		request.StartDate.ToTime(),
+		request.EndDate.ToTimePtr(),
 	)
 
 	err := s.subRepo.Add(sub)
@@ -71,8 +71,8 @@ func (s *subscriptionService) UpdateSubscription(id uuid.UUID, request dto.Updat
 
 	sub.SetServiceName(request.ServiceName)
 	sub.SetPrice(request.Price)
-	sub.SetStartDate(request.StartDate)
-	sub.SetEndDate(request.EndDate)
+	sub.SetStartDate(request.StartDate.ToTime())
+	sub.SetEndDate(request.EndDate.ToTimePtr())
 
 	err = s.subRepo.Update(sub)
 	if err != nil {
