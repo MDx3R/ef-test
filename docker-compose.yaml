@@ -18,7 +18,7 @@ services:
     build: .
     restart: on-failure:5
     ports:
-      - "${GO_SERVICE_PORT}:8080"
+      - "${SERVICE_HOST_PORT}:8080"
     env_file: .env
     volumes:
       - ./configs:/app/configs

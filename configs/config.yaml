@@ -11,7 +11,7 @@ server:
     allow_credentials: true
 database:
   driver: postgres
-  host: localhost
+  host: postgres
   port: "5432"
   username: postgres
   password: password

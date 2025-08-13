@@ -12,12 +12,12 @@ COPY configs ./configs
 COPY migrations ./migrations
 COPY docs ./docs
 
-RUN go build -o myapp cmd/app/main.go
+RUN go build -o myservice cmd/service/main.go
 
 FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/myapp .
+COPY --from=builder /app/myservice .
 
-CMD ["./myapp"]
+CMD ["./myservice"]
