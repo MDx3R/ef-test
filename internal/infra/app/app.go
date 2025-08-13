@@ -34,13 +34,14 @@ func NewApp(cfg *config.Config, logger *logrus.Logger) *App {
 
 	subService := usecase.NewSubscriptionService(subRepository)
 
-	subHandler := handlers.NewSubscriptionHandler(subService)
+	subHandler := handlers.NewSubscriptionHandler(subService, logger)
 
 	logger.Info("initializing http server")
 
 	ginserver.SetMode(cfg)
 	server := ginserver.New(&cfg.Server)
 
+	server.RegisterSwagger()
 	server.RegisterSubscriptionHandler(subHandler)
 
 	logger.Info("http server initialized")

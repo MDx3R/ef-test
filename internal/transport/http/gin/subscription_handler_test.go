@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	logruslogger "github.com/MDx3R/ef-test/internal/infra/logger"
 	handlers "github.com/MDx3R/ef-test/internal/transport/http/gin"
 	"github.com/MDx3R/ef-test/internal/usecase"
 	"github.com/MDx3R/ef-test/internal/usecase/dto"
@@ -20,11 +21,13 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+var logger = logruslogger.NewLogger()
+
 func setupRouterAndHandler(t *testing.T) (*gin.Engine, *mock_usecase.MockSubscriptionService) {
 	gin.SetMode(gin.TestMode)
 
 	mockService := mock_usecase.NewMockSubscriptionService(t)
-	handler := handlers.NewSubscriptionHandler(mockService)
+	handler := handlers.NewSubscriptionHandler(mockService, logger)
 
 	r := gin.New()
 	r.GET("", handler.List)

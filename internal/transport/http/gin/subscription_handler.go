@@ -11,10 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type SubscriptionHandler struct {
 	subService usecase.SubscriptionService
+	logger     *logrus.Logger
 }
 
 // Get godoc
@@ -29,17 +31,21 @@ type SubscriptionHandler struct {
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /subscriptions/{id} [get]
 func (h *SubscriptionHandler) Get(ctx *gin.Context) {
+	h.logger.Info("handling get subscription request")
 	id, ok := h.parseUUIDParam(ctx, "id")
 	if !ok {
+		h.logger.Warn("invalid uuid parameter")
 		return
 	}
 
 	sub, err := h.subService.GetSubscription(id)
 	if err != nil {
+		h.logger.WithError(err).WithField("subscription_id", id).Error("failed to get subscription")
 		h.handleServiceError(ctx, err)
 		return
 	}
 
+	h.logger.WithField("subscription_id", id).Info("subscription retrieved successfully")
 	ctx.JSON(http.StatusOK, sub)
 }
 
@@ -54,19 +60,23 @@ func (h *SubscriptionHandler) Get(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /subscriptions [get]
 func (h *SubscriptionHandler) List(ctx *gin.Context) {
+	h.logger.Info("handling list subscriptions request")
 	var filter dto.SubscriptionFilter
 
 	if err := ctx.ShouldBindQuery(&filter); err != nil {
+		h.logger.WithError(err).Warn("failed to bind query parameters")
 		h.handleValidationError(ctx, err)
 		return
 	}
 
 	subs, err := h.subService.ListSubscriptions(filter)
 	if err != nil {
+		h.logger.WithError(err).Error("failed to list subscriptions")
 		h.handleServiceError(ctx, err)
 		return
 	}
 
+	h.logger.WithField("count", len(subs)).Info("subscriptions listed successfully")
 	ctx.JSON(http.StatusOK, subs)
 }
 
@@ -81,17 +91,21 @@ func (h *SubscriptionHandler) List(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /subscriptions/{id} [delete]
 func (h *SubscriptionHandler) Delete(ctx *gin.Context) {
+	h.logger.Info("handling delete subscription request")
 	id, ok := h.parseUUIDParam(ctx, "id")
 	if !ok {
+		h.logger.Warn("invalid uuid parameter")
 		return
 	}
 
 	err := h.subService.DeleteSubscription(id)
 	if err != nil {
+		h.logger.WithError(err).WithField("subscription_id", id).Error("failed to delete subscription")
 		h.handleServiceError(ctx, err)
 		return
 	}
 
+	h.logger.WithField("subscription_id", id).Info("subscription deleted successfully")
 	ctx.JSON(http.StatusNoContent, gin.H{})
 }
 
@@ -108,19 +122,23 @@ func (h *SubscriptionHandler) Delete(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /subscriptions [post]
 func (h *SubscriptionHandler) Create(ctx *gin.Context) {
+	h.logger.Info("handling create subscription request")
 	var request dto.CreateSubscriptionRequests
 
 	if err := ctx.ShouldBindBodyWithJSON(&request); err != nil {
+		h.logger.WithError(err).Warn("invalid request body")
 		h.handleValidationError(ctx, err)
 		return
 	}
 
 	id, err := h.subService.CreateSubscription(request)
 	if err != nil {
+		h.logger.WithError(err).Error("failed to create subscription")
 		h.handleServiceError(ctx, err)
 		return
 	}
 
+	h.logger.WithField("subscription_id", id).Info("subscription created successfully")
 	ctx.JSON(http.StatusCreated, response.IDResponse{ID: id})
 }
 
@@ -139,24 +157,29 @@ func (h *SubscriptionHandler) Create(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /subscriptions/{id} [put]
 func (h *SubscriptionHandler) Update(ctx *gin.Context) {
+	h.logger.Info("handling update subscription request")
 	var request dto.UpdateSubscriptionRequests
 
 	id, ok := h.parseUUIDParam(ctx, "id")
 	if !ok {
+		h.logger.Warn("invalid uuid parameter")
 		return
 	}
 
 	if err := ctx.ShouldBindBodyWithJSON(&request); err != nil {
+		h.logger.WithError(err).Warn("invalid request body")
 		h.handleValidationError(ctx, err)
 		return
 	}
 
 	err := h.subService.UpdateSubscription(id, request)
 	if err != nil {
+		h.logger.WithError(err).WithField("subscription_id", id).Error("failed to update subscription")
 		h.handleServiceError(ctx, err)
 		return
 	}
 
+	h.logger.WithField("subscription_id", id).Info("subscription updated successfully")
 	ctx.JSON(http.StatusNoContent, gin.H{})
 }
 
@@ -171,19 +194,23 @@ func (h *SubscriptionHandler) Update(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /subscriptions/cost [get]
 func (h *SubscriptionHandler) CalculateTotalCost(ctx *gin.Context) {
+	h.logger.Info("handling calculate total cost request")
 	var request dto.TotalCostFilter
 
 	if err := ctx.ShouldBindQuery(&request); err != nil {
+		h.logger.WithError(err).Warn("invalid query parameters")
 		h.handleValidationError(ctx, err)
 		return
 	}
 
 	result, err := h.subService.CalculateTotalCost(request)
 	if err != nil {
+		h.logger.WithError(err).Error("failed to calculate total cost")
 		h.handleServiceError(ctx, err)
 		return
 	}
 
+	h.logger.WithField("total_cost", result).Info("total cost calculated successfully")
 	ctx.JSON(http.StatusOK, response.IntResponse{Value: result})
 }
 
@@ -191,7 +218,8 @@ func (h *SubscriptionHandler) parseUUIDParam(ctx *gin.Context, param string) (uu
 	idStr := ctx.Param(param)
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		h.respondError(ctx, http.StatusBadRequest, fmt.Errorf("uuid not valid: %s", ctx.Param("id")))
+		h.logger.WithField("param", idStr).Warn("uuid not valid")
+		h.respondError(ctx, http.StatusBadRequest, fmt.Errorf("uuid not valid: %s", idStr))
 		return uuid.Nil, false
 	}
 	return id, true
@@ -207,6 +235,12 @@ func (h *SubscriptionHandler) handleServiceError(ctx *gin.Context, err error) {
 }
 
 func (h *SubscriptionHandler) handleValidationError(ctx *gin.Context, err error) {
+	h.logger.WithFields(logrus.Fields{
+		"error":  err,
+		"path":   ctx.FullPath(),
+		"method": ctx.Request.Method,
+	}).Warn("validation error")
+
 	var verr validator.ValidationErrors
 
 	if errors.As(err, &verr) {
@@ -237,8 +271,9 @@ func (h *SubscriptionHandler) respondValidationError(ctx *gin.Context, errMap ma
 	})
 }
 
-func NewSubscriptionHandler(subService usecase.SubscriptionService) *SubscriptionHandler {
+func NewSubscriptionHandler(subService usecase.SubscriptionService, logger *logrus.Logger) *SubscriptionHandler {
 	return &SubscriptionHandler{
 		subService: subService,
+		logger:     logger,
 	}
 }
