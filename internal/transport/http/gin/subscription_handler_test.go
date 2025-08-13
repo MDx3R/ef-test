@@ -1,6 +1,7 @@
 package gin_test
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func setupRouterAndHandler(t *testing.T) (*gin.Engine, *mock_usecase.MockSubscriptionService) {
@@ -126,11 +128,12 @@ func TestSubscriptionHandler_List_Success(t *testing.T) {
 func TestSubscriptionHandler_Create_Success(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
+	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
 	request := dto.CreateSubscriptionRequests{
 		ServiceName: "test_service",
 		Price:       100,
 		UserID:      uuid.New(),
-		StartDate:   model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)),
+		StartDate:   &startDate,
 		EndDate:     nil,
 	}
 
@@ -170,16 +173,76 @@ func TestSubscriptionHandler_Create_InvalidJSON(t *testing.T) {
 	assert.Contains(t, w.Body.String(), "error")
 }
 
-// TODO: Create Validation tests
+func TestSubscriptionHandler_Create_InvalidJSON_Validation(t *testing.T) {
+	router, _ := setupRouterAndHandler(t)
+
+	tests := []struct {
+		name       string
+		jsonBody   string
+		expectCode int
+		expectErr  string
+	}{
+		{
+			name:       "missing service_name",
+			jsonBody:   `{"price":100,"user_id":"` + uuid.New().String() + `","start_date":"08-2025"}`,
+			expectCode: http.StatusUnprocessableEntity,
+			expectErr:  "ServiceName",
+		},
+		{
+			name:       "missing price",
+			jsonBody:   `{"service_name":"Test","user_id":"` + uuid.New().String() + `","start_date":"08-2025"}`,
+			expectCode: http.StatusUnprocessableEntity,
+			expectErr:  "Price",
+		},
+		{
+			name:       "missing user_id",
+			jsonBody:   `{"service_name":"Test","price":100,"start_date":"08-2025"}`,
+			expectCode: http.StatusUnprocessableEntity,
+			expectErr:  "UserID",
+		},
+		{
+			name:       "missing start_date",
+			jsonBody:   `{"service_name":"Test","price":100,"user_id":"` + uuid.New().String() + `"}`,
+			expectCode: http.StatusUnprocessableEntity,
+			expectErr:  "StartDate",
+		},
+		{
+			name:       "invalid month-year format",
+			jsonBody:   `{"service_name":"Test","price":100,"user_id":"` + uuid.New().String() + `","start_date":"2025-08-01"}`,
+			expectCode: http.StatusBadRequest,
+			expectErr:  "error",
+		},
+		{
+			name:       "invalid json syntax",
+			jsonBody:   `{invalid_json}`,
+			expectCode: http.StatusBadRequest,
+			expectErr:  "error",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.jsonBody))
+			req.Header.Set("Content-Type", "application/json")
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tc.expectCode, w.Code)
+			assert.Contains(t, w.Body.String(), tc.expectErr)
+		})
+	}
+}
 
 func TestSubscriptionHandler_Update_Success(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
 	id := uuid.New()
+	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
 	request := dto.UpdateSubscriptionRequests{
 		ServiceName: "test_service",
 		Price:       100,
-		StartDate:   model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)),
+		StartDate:   &startDate,
 		EndDate:     nil,
 	}
 
@@ -230,7 +293,61 @@ func TestSubscriptionHandler_Update_InvalidJSON(t *testing.T) {
 	assert.Contains(t, w.Body.String(), "error")
 }
 
-// TODO: Update Validation tests
+func TestSubscriptionHandler_Update_InvalidJSON_Validation(t *testing.T) {
+	router, _ := setupRouterAndHandler(t)
+
+	tests := []struct {
+		name       string
+		jsonBody   string
+		expectCode int
+		expectErr  string
+	}{
+		{
+			name:       "missing service_name",
+			jsonBody:   `{"price":100,"start_date":"08-2025"}`,
+			expectCode: http.StatusUnprocessableEntity,
+			expectErr:  "ServiceName",
+		},
+		{
+			name:       "missing price",
+			jsonBody:   `{"service_name":"Test","start_date":"08-2025"}`,
+			expectCode: http.StatusUnprocessableEntity,
+			expectErr:  "Price",
+		},
+		{
+			name:       "missing start_date",
+			jsonBody:   `{"service_name":"Test","price":100}`,
+			expectCode: http.StatusUnprocessableEntity,
+			expectErr:  "StartDate",
+		},
+		{
+			name:       "invalid month-year format",
+			jsonBody:   `{"service_name":"Test","price":100,"start_date":"2025-08-01"}`,
+			expectCode: http.StatusBadRequest,
+			expectErr:  "error",
+		},
+		{
+			name:       "invalid json syntax",
+			jsonBody:   `{invalid_json}`,
+			expectCode: http.StatusBadRequest,
+			expectErr:  "error",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			id := uuid.New()
+			req := httptest.NewRequest(http.MethodPut, "/"+id.String(), strings.NewReader(tc.jsonBody))
+			req.Header.Set("Content-Type", "application/json")
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tc.expectCode, w.Code)
+			assert.Contains(t, w.Body.String(), tc.expectErr)
+		})
+	}
+}
 
 func TestSubscriptionHandler_Delete_Success(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
@@ -260,4 +377,85 @@ func TestSubscriptionHandler_Delete_InvalidUUID(t *testing.T) {
 	assert.Contains(t, w.Body.String(), "error")
 }
 
-// TODO: Service Error tests
+func TestSubscriptionHandler_Get_ServiceError(t *testing.T) {
+	router, mockService := setupRouterAndHandler(t)
+
+	subID := uuid.New()
+	mockService.On("GetSubscription", subID).Return(dto.SubscriptionResponse{}, errors.New("service failure"))
+
+	req := httptest.NewRequest(http.MethodGet, "/"+subID.String(), nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	mockService.AssertExpectations(t)
+}
+
+func TestSubscriptionHandler_List_ServiceError(t *testing.T) {
+	router, mockService := setupRouterAndHandler(t)
+
+	mockService.On("ListSubscriptions", mock.Anything).Return(nil, errors.New("service failure"))
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	mockService.AssertExpectations(t)
+}
+
+func TestSubscriptionHandler_Create_ServiceError(t *testing.T) {
+	router, mockService := setupRouterAndHandler(t)
+
+	jsonBody := fmt.Sprintf(
+		`{"service_name":"%v", "price":%v, "user_id":"%v", "start_date":"08-2025"}`,
+		"test_service",
+		100,
+		uuid.New().String(),
+	)
+
+	mockService.On("CreateSubscription", mock.Anything).Return(uuid.Nil, errors.New("service failure"))
+
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	mockService.AssertExpectations(t)
+}
+
+func TestSubscriptionHandler_Update_ServiceError(t *testing.T) {
+	router, mockService := setupRouterAndHandler(t)
+
+	subID := uuid.New()
+	jsonBody := `{"service_name":"Updated","price":200,"start_date":"09-2025"}`
+	mockService.On("UpdateSubscription", subID, mock.Anything).Return(errors.New("service failure"))
+
+	req := httptest.NewRequest(http.MethodPut, "/"+subID.String(), strings.NewReader(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	mockService.AssertExpectations(t)
+}
+
+func TestSubscriptionHandler_Delete_ServiceError(t *testing.T) {
+	router, mockService := setupRouterAndHandler(t)
+
+	subID := uuid.New()
+	mockService.On("DeleteSubscription", subID).Return(errors.New("service failure"))
+
+	req := httptest.NewRequest(http.MethodDelete, "/"+subID.String(), nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	mockService.AssertExpectations(t)
+}

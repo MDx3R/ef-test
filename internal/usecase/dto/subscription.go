@@ -19,14 +19,14 @@ type CreateSubscriptionRequests struct {
 	ServiceName string           `json:"service_name" binding:"required"`
 	Price       int              `json:"price" binding:"required"`
 	UserID      uuid.UUID        `json:"user_id" binding:"required"`
-	StartDate   model.MonthYear  `json:"start_date" binding:"required"`
+	StartDate   *model.MonthYear `json:"start_date" binding:"required"`
 	EndDate     *model.MonthYear `json:"end_date,omitempty"`
 }
 
 type UpdateSubscriptionRequests struct {
 	ServiceName string           `json:"service_name" binding:"required"`
 	Price       int              `json:"price" binding:"required"`
-	StartDate   model.MonthYear  `json:"start_date" binding:"required"`
+	StartDate   *model.MonthYear `json:"start_date" binding:"required"`
 	EndDate     *model.MonthYear `json:"end_date,omitempty"`
 }
 
@@ -41,10 +41,10 @@ type SubscriptionFilter struct {
 }
 
 type TotalCostFilter struct {
-	UserID      uuid.UUID       `form:"user_id" binding:"required"`
-	ServiceName string          `form:"service_name" binding:"required"`
-	PeriodStart model.MonthYear `form:"period_start" binding:"required"`
-	PeriodEnd   model.MonthYear `form:"period_end" binding:"required"`
+	UserID      uuid.UUID        `form:"user_id" binding:"required"`
+	ServiceName string           `form:"service_name" binding:"required"`
+	PeriodStart *model.MonthYear `form:"period_start" binding:"required"`
+	PeriodEnd   *model.MonthYear `form:"period_end" binding:"required"`
 }
 
 func FromSubscription(sub *entity.Subscription) SubscriptionResponse {

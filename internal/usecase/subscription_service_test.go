@@ -106,11 +106,12 @@ func TestSubscriptionService_ListSubscriptions_Error(t *testing.T) {
 func TestSubscriptionService_CreateSubscriptions(t *testing.T) {
 	mockRepo, service := setupSubscriptionService(t)
 
+	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
 	endDate := model.NewMonthYear(time.Date(2025, 8, 2, 0, 0, 0, 0, time.UTC))
 	req := dto.CreateSubscriptionRequests{
 		ServiceName: "service_test",
 		Price:       100,
-		StartDate:   model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)),
+		StartDate:   &startDate,
 		EndDate:     &endDate,
 	}
 
@@ -142,12 +143,13 @@ func TestSubscriptionService_UpdateSubscriptions(t *testing.T) {
 
 	sub := makeTestSubscription(t)
 	id := sub.ID()
-	endDate := model.NewMonthYear(time.Date(2025, 9, 10, 0, 0, 0, 0, time.UTC))
 
+	startDate := model.NewMonthYear(time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC))
+	endDate := model.NewMonthYear(time.Date(2025, 9, 10, 0, 0, 0, 0, time.UTC))
 	req := dto.UpdateSubscriptionRequests{
 		ServiceName: "updated_name",
 		Price:       150,
-		StartDate:   model.NewMonthYear(time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC)),
+		StartDate:   &startDate,
 		EndDate:     &endDate,
 	}
 
@@ -241,11 +243,13 @@ func TestSubscriptionService_DeleteSubscription_NotFound_Skips(t *testing.T) {
 func TestSubscriptionService_CalculateTotalCost(t *testing.T) {
 	mockRepo, service := setupSubscriptionService(t)
 
+	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
+	endDate := model.NewMonthYear(time.Date(2030, 9, 1, 0, 0, 0, 0, time.UTC))
 	filter := dto.TotalCostFilter{
 		UserID:      uuid.New(),
 		ServiceName: "service_test",
-		PeriodStart: model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)),
-		PeriodEnd:   model.NewMonthYear(time.Date(2030, 9, 1, 0, 0, 0, 0, time.UTC)),
+		PeriodStart: &startDate,
+		PeriodEnd:   &endDate,
 	}
 
 	mockRepo.On("CalculateTotalCost", filter).Return(150, nil)
