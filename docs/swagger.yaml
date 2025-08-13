@@ -3,14 +3,19 @@ definitions:
   dto.CreateSubscriptionRequest:
     properties:
       end_date:
+        example: 09-2025
         type: string
       price:
+        example: 999
         type: integer
       service_name:
+        example: Netflix
         type: string
       start_date:
+        example: 08-2025
         type: string
       user_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
         type: string
     required:
     - price
@@ -60,12 +65,16 @@ definitions:
   dto.UpdateSubscriptionRequest:
     properties:
       end_date:
+        example: 09-2025
         type: string
       price:
+        example: 999
         type: integer
       service_name:
+        example: Netflix
         type: string
       start_date:
+        example: 08-2025
         type: string
     required:
     - price
@@ -102,20 +111,24 @@ paths:
         in: query
         name: end_date
         type: string
-      - in: query
+      - example: 1
+        in: query
         name: page
         type: integer
-      - in: query
+      - example: 20
+        in: query
         name: page_size
         type: integer
-      - in: query
+      - example: Netflix
+        in: query
         name: service_name
         type: string
       - example: 08-2025
         in: query
         name: start_date
         type: string
-      - in: query
+      - example: 123e4567-e89b-12d3-a456-426614174000
+        in: query
         name: user_id
         type: string
       produces:
@@ -285,11 +298,13 @@ paths:
         name: period_start
         required: true
         type: string
-      - in: query
+      - example: Netflix
+        in: query
         name: service_name
         required: true
         type: string
-      - in: query
+      - example: 123e4567-e89b-12d3-a456-426614174000
+        in: query
         name: user_id
         required: true
         type: string

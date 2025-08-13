@@ -38,16 +38,19 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "example": 1,
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "example": 20,
                         "name": "page_size",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "example": "Netflix",
                         "name": "service_name",
                         "in": "query"
                     },
@@ -59,6 +62,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "example": "123e4567-e89b-12d3-a456-426614174000",
                         "name": "user_id",
                         "in": "query"
                     }
@@ -165,12 +169,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "example": "Netflix",
                         "name": "service_name",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
+                        "example": "123e4567-e89b-12d3-a456-426614174000",
                         "name": "user_id",
                         "in": "query",
                         "required": true
@@ -359,19 +365,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "end_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "09-2025"
                 },
                 "price": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 999
                 },
                 "service_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Netflix"
                 },
                 "start_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "08-2025"
                 },
                 "user_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
@@ -440,16 +451,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "end_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "09-2025"
                 },
                 "price": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 999
                 },
                 "service_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Netflix"
                 },
                 "start_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "08-2025"
                 }
             }
         },
