@@ -8,6 +8,7 @@ import (
 
 	"github.com/MDx3R/ef-test/internal/config"
 	"github.com/MDx3R/ef-test/internal/infra/app"
+	"github.com/MDx3R/ef-test/internal/infra/database/migrate"
 	logruslogger "github.com/MDx3R/ef-test/internal/infra/logger"
 	"github.com/joho/godotenv"
 )
@@ -41,11 +42,7 @@ func main() {
 	app := app.NewApp(cfg, logger)
 
 	logger.Info("running migrations...")
-
-	if err := app.Database.Migrate(); err != nil {
-		logger.Fatalf("failed to run migrations: %v", err)
-	}
-
+	migrate.MustRunMigrations(&cfg.Database, logger)
 	logger.Info("finished migrations...")
 
 	stop := make(chan os.Signal, 1)
