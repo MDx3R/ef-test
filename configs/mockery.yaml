@@ -1,0 +1,14 @@
+all: false
+
+packages:
+  github.com/MDx3R/ef-test/internal/usecase:
+    interfaces:
+      SubscriptionService:
+      SubscriptionRepository:
+
+dir: "{{.InterfaceDir}}/mocks"
+filename: "mock_{{.InterfaceName | lower}}.go"
+pkgname: "mock_{{.SrcPackageName}}"
+inpackage: false
+recursive: true
+log-level: debug
