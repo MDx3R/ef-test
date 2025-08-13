@@ -8,7 +8,6 @@ import (
 	"github.com/MDx3R/ef-test/internal/usecase"
 	"github.com/MDx3R/ef-test/internal/usecase/dto"
 	mock_usecase "github.com/MDx3R/ef-test/internal/usecase/mocks"
-	"github.com/MDx3R/ef-test/internal/usecase/model"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -48,7 +47,7 @@ func TestSubscriptionService_GetSubscription(t *testing.T) {
 	assert.Equal(t, id, resp.ID)
 	assert.Equal(t, "test_service", resp.ServiceName)
 	assert.Equal(t, 100, resp.Price)
-	assert.Equal(t, model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)), resp.StartDate)
+	assert.Equal(t, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), resp.StartDate)
 	assert.Nil(t, resp.EndDate)
 	assert.IsType(t, uuid.UUID{}, resp.UserID)
 	mockRepo.AssertExpectations(t)
@@ -106,12 +105,12 @@ func TestSubscriptionService_ListSubscriptions_Error(t *testing.T) {
 func TestSubscriptionService_CreateSubscriptions(t *testing.T) {
 	mockRepo, service := setupSubscriptionService(t)
 
-	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
-	endDate := model.NewMonthYear(time.Date(2025, 8, 2, 0, 0, 0, 0, time.UTC))
-	req := dto.CreateSubscriptionRequests{
+	startDate := time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(2025, 8, 2, 0, 0, 0, 0, time.UTC)
+	req := dto.CreateSubscriptionCommand{
 		ServiceName: "service_test",
 		Price:       100,
-		StartDate:   &startDate,
+		StartDate:   startDate,
 		EndDate:     &endDate,
 	}
 
@@ -127,7 +126,7 @@ func TestSubscriptionService_CreateSubscriptions(t *testing.T) {
 func TestSubscriptionService_CreateSubscriptions_Error(t *testing.T) {
 	mockRepo, service := setupSubscriptionService(t)
 
-	req := dto.CreateSubscriptionRequests{}
+	req := dto.CreateSubscriptionCommand{}
 
 	mockRepo.On("Add", mock.AnythingOfType("*entity.Subscription")).Return(usecase.ErrRepository)
 
@@ -144,12 +143,12 @@ func TestSubscriptionService_UpdateSubscriptions(t *testing.T) {
 	sub := makeTestSubscription(t)
 	id := sub.ID()
 
-	startDate := model.NewMonthYear(time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC))
-	endDate := model.NewMonthYear(time.Date(2025, 9, 10, 0, 0, 0, 0, time.UTC))
-	req := dto.UpdateSubscriptionRequests{
+	startDate := time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(2025, 9, 10, 0, 0, 0, 0, time.UTC)
+	req := dto.UpdateSubscriptionCommand{
 		ServiceName: "updated_name",
 		Price:       150,
-		StartDate:   &startDate,
+		StartDate:   startDate,
 		EndDate:     &endDate,
 	}
 
@@ -158,8 +157,8 @@ func TestSubscriptionService_UpdateSubscriptions(t *testing.T) {
 		return (u.ID() == sub.ID() &&
 			u.ServiceName() == req.ServiceName &&
 			u.UserID() == sub.UserID() &&
-			time.Time.Equal(u.StartDate(), req.StartDate.ToTime()) &&
-			time.Time.Equal(*u.EndDate(), req.EndDate.ToTime()))
+			time.Time.Equal(u.StartDate(), req.StartDate) &&
+			time.Time.Equal(*u.EndDate(), *req.EndDate))
 	})).Return(nil)
 
 	err := service.UpdateSubscription(id, req)
@@ -174,7 +173,7 @@ func TestSubscriptionService_UpdateSubscriptions_GetError(t *testing.T) {
 	sub := makeTestSubscription(t)
 	id := sub.ID()
 
-	req := dto.UpdateSubscriptionRequests{}
+	req := dto.UpdateSubscriptionCommand{}
 
 	mockRepo.On("Get", id).Return(nil, usecase.ErrNotFound)
 
@@ -190,7 +189,7 @@ func TestSubscriptionService_UpdateSubscriptions_UpdateError(t *testing.T) {
 	sub := makeTestSubscription(t)
 	id := sub.ID()
 
-	req := dto.UpdateSubscriptionRequests{}
+	req := dto.UpdateSubscriptionCommand{}
 
 	mockRepo.On("Get", id).Return(sub, nil)
 	mockRepo.On("Update", mock.Anything).Return(usecase.ErrRepository)
@@ -243,13 +242,13 @@ func TestSubscriptionService_DeleteSubscription_NotFound_Skips(t *testing.T) {
 func TestSubscriptionService_CalculateTotalCost(t *testing.T) {
 	mockRepo, service := setupSubscriptionService(t)
 
-	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
-	endDate := model.NewMonthYear(time.Date(2030, 9, 1, 0, 0, 0, 0, time.UTC))
+	startDate := time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(2030, 9, 1, 0, 0, 0, 0, time.UTC)
 	filter := dto.TotalCostFilter{
-		UserID:      uuid.New().String(),
+		UserID:      uuid.New(),
 		ServiceName: "service_test",
-		PeriodStart: &startDate,
-		PeriodEnd:   &endDate,
+		PeriodStart: startDate,
+		PeriodEnd:   endDate,
 	}
 
 	mockRepo.On("CalculateTotalCost", filter).Return(150, nil)

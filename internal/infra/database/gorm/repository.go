@@ -48,10 +48,10 @@ func (r *gormSubscriptionRepository) List(filter dto.SubscriptionFilter) ([]*ent
 		stmt = stmt.Where("service_name = ?", *filter.ServiceName)
 	}
 	if filter.StartDate != nil {
-		stmt = stmt.Where("start_date >= ?", filter.StartDate.ToTime())
+		stmt = stmt.Where("start_date >= ?", filter.StartDate)
 	}
 	if filter.EndDate != nil {
-		stmt = stmt.Where("end_date IS NULL OR end_date <= ?", filter.EndDate.ToTime())
+		stmt = stmt.Where("end_date IS NULL OR end_date <= ?", filter.EndDate)
 	}
 
 	offset := (filter.Page - 1) * filter.PageSize
@@ -106,7 +106,7 @@ func (r *gormSubscriptionRepository) CalculateTotalCost(filter dto.TotalCostFilt
 	stmt := r.tx.Model(&gormmodel.SubscriptionModel{}).Select("sum(price)")
 	stmt = stmt.Where("user_id = ?", filter.UserID)
 	stmt = stmt.Where("service_name = ?", filter.ServiceName)
-	stmt = stmt.Where("start_date BETWEEN ? AND ?", filter.PeriodStart.ToTime(), filter.PeriodEnd.ToTime())
+	stmt = stmt.Where("start_date BETWEEN ? AND ?", filter.PeriodStart, filter.PeriodEnd)
 
 	err := stmt.Scan(&result).Error
 	if err != nil {

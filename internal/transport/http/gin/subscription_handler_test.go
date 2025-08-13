@@ -14,7 +14,6 @@ import (
 	"github.com/MDx3R/ef-test/internal/usecase"
 	"github.com/MDx3R/ef-test/internal/usecase/dto"
 	mock_usecase "github.com/MDx3R/ef-test/internal/usecase/mocks"
-	"github.com/MDx3R/ef-test/internal/usecase/model"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -40,14 +39,14 @@ func setupRouterAndHandler(t *testing.T) (*gin.Engine, *mock_usecase.MockSubscri
 	return r, mockService
 }
 
-func makeTestSubscriptionResponse(t *testing.T) dto.SubscriptionResponse {
+func makeTestSubscriptionDTO(t *testing.T) dto.SubscriptionDTO {
 	id := uuid.New()
-	return dto.SubscriptionResponse{
+	return dto.SubscriptionDTO{
 		ID:          id,
 		ServiceName: "test_service",
 		Price:       100,
 		UserID:      uuid.New(),
-		StartDate:   model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)),
+		StartDate:   time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC),
 		EndDate:     nil,
 	}
 }
@@ -55,7 +54,7 @@ func makeTestSubscriptionResponse(t *testing.T) dto.SubscriptionResponse {
 func TestSubscriptionHandler_Get_Success(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
-	sub := makeTestSubscriptionResponse(t)
+	sub := makeTestSubscriptionDTO(t)
 	id := sub.ID
 
 	mockService.On("GetSubscription", id).Return(sub, nil)
@@ -88,10 +87,10 @@ func TestSubscriptionHandler_Get_InvalidUUID(t *testing.T) {
 func TestSubscriptionHandler_Get_NotFound(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
-	sub := makeTestSubscriptionResponse(t)
+	sub := makeTestSubscriptionDTO(t)
 	id := sub.ID
 
-	mockService.On("GetSubscription", id).Return(dto.SubscriptionResponse{}, usecase.ErrNotFound)
+	mockService.On("GetSubscription", id).Return(dto.SubscriptionDTO{}, usecase.ErrNotFound)
 
 	req := httptest.NewRequest(http.MethodGet, "/"+id.String(), nil)
 	w := httptest.NewRecorder()
@@ -106,9 +105,9 @@ func TestSubscriptionHandler_Get_NotFound(t *testing.T) {
 func TestSubscriptionHandler_List_Success(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
-	subs := []dto.SubscriptionResponse{
-		makeTestSubscriptionResponse(t),
-		makeTestSubscriptionResponse(t),
+	subs := []dto.SubscriptionDTO{
+		makeTestSubscriptionDTO(t),
+		makeTestSubscriptionDTO(t),
 	}
 
 	filter := dto.SubscriptionFilter{Page: 1, PageSize: 20}
@@ -131,12 +130,12 @@ func TestSubscriptionHandler_List_Success(t *testing.T) {
 func TestSubscriptionHandler_Create_Success(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
-	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
-	request := dto.CreateSubscriptionRequests{
+	startDate := time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)
+	request := dto.CreateSubscriptionCommand{
 		ServiceName: "test_service",
 		Price:       100,
 		UserID:      uuid.New(),
-		StartDate:   &startDate,
+		StartDate:   startDate,
 		EndDate:     nil,
 	}
 
@@ -241,11 +240,11 @@ func TestSubscriptionHandler_Update_Success(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
 	id := uuid.New()
-	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
-	request := dto.UpdateSubscriptionRequests{
+	startDate := time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)
+	request := dto.UpdateSubscriptionCommand{
 		ServiceName: "test_service",
 		Price:       100,
-		StartDate:   &startDate,
+		StartDate:   startDate,
 		EndDate:     nil,
 	}
 
@@ -384,7 +383,7 @@ func TestSubscriptionHandler_Get_ServiceError(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
 	subID := uuid.New()
-	mockService.On("GetSubscription", subID).Return(dto.SubscriptionResponse{}, errors.New("service failure"))
+	mockService.On("GetSubscription", subID).Return(dto.SubscriptionDTO{}, errors.New("service failure"))
 
 	req := httptest.NewRequest(http.MethodGet, "/"+subID.String(), nil)
 	w := httptest.NewRecorder()
@@ -467,13 +466,13 @@ func TestSubscriptionHandler_TotalCost_Success(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
 	userID := uuid.New()
-	periodStart := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
-	periodEnd := model.NewMonthYear(time.Date(2025, 10, 1, 0, 0, 0, 0, time.UTC))
+	periodStart := time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)
+	periodEnd := time.Date(2025, 10, 1, 0, 0, 0, 0, time.UTC)
 	request := dto.TotalCostFilter{
-		UserID:      userID.String(),
+		UserID:      userID,
 		ServiceName: "test_service",
-		PeriodStart: &periodStart,
-		PeriodEnd:   &periodEnd,
+		PeriodStart: periodStart,
+		PeriodEnd:   periodEnd,
 	}
 
 	query := fmt.Sprintf(
@@ -500,13 +499,13 @@ func TestSubscriptionHandler_TotalCost_ServiceError(t *testing.T) {
 	router, mockService := setupRouterAndHandler(t)
 
 	userID := uuid.New()
-	periodStart := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
-	periodEnd := model.NewMonthYear(time.Date(2025, 10, 1, 0, 0, 0, 0, time.UTC))
+	periodStart := time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)
+	periodEnd := time.Date(2025, 10, 1, 0, 0, 0, 0, time.UTC)
 	request := dto.TotalCostFilter{
-		UserID:      userID.String(),
+		UserID:      userID,
 		ServiceName: "test_service",
-		PeriodStart: &periodStart,
-		PeriodEnd:   &periodEnd,
+		PeriodStart: periodStart,
+		PeriodEnd:   periodEnd,
 	}
 
 	query := fmt.Sprintf(

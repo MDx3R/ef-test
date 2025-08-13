@@ -17,7 +17,6 @@ import (
 	gormdb "github.com/MDx3R/ef-test/internal/infra/database/gorm"
 	"github.com/MDx3R/ef-test/internal/usecase"
 	"github.com/MDx3R/ef-test/internal/usecase/dto"
-	"github.com/MDx3R/ef-test/internal/usecase/model"
 
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -247,9 +246,8 @@ func TestGormSubscriptionRepository_List_FilterByUserID(t *testing.T) {
 	assert.NoError(t, repo.Add(sub1))
 	assert.NoError(t, repo.Add(sub2))
 
-	userID1Str := userID1.String()
 	filter := dto.SubscriptionFilter{
-		UserID:   &userID1Str,
+		UserID:   &userID1,
 		Page:     1,
 		PageSize: 10,
 	}
@@ -293,8 +291,8 @@ func TestSubscriptionRepository_List_FilterDates(t *testing.T) {
 	clearTable(t)
 
 	// Arrange
-	startDate := model.NewMonthYear(time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC))
-	endDate := model.NewMonthYear(time.Date(2025, 8, 31, 23, 59, 59, 0, time.UTC))
+	startDate := time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(2025, 8, 31, 23, 59, 59, 0, time.UTC)
 
 	// 1. start_date: 2025-07-01, end_date: NULL
 	sub1, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceA", uuid.New(), 100, time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC), nil)
@@ -409,13 +407,13 @@ func TestGormSubscriptionRepository_CalculateTotalCost(t *testing.T) {
 	assert.NoError(t, repo.Add(sub2))
 	assert.NoError(t, repo.Add(sub3))
 
-	startDate := model.NewMonthYear(time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC))
-	endDate := model.NewMonthYear(time.Date(2025, 8, 31, 23, 59, 59, 0, time.UTC))
+	startDate := time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(2025, 8, 31, 23, 59, 59, 0, time.UTC)
 	filter := dto.TotalCostFilter{
-		UserID:      userID.String(),
+		UserID:      userID,
 		ServiceName: "serviceA",
-		PeriodStart: &startDate,
-		PeriodEnd:   &endDate,
+		PeriodStart: startDate,
+		PeriodEnd:   endDate,
 	}
 
 	// Act

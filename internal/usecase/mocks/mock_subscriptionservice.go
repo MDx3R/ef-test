@@ -98,7 +98,7 @@ func (_c *MockSubscriptionService_CalculateTotalCost_Call) RunAndReturn(run func
 }
 
 // CreateSubscription provides a mock function for the type MockSubscriptionService
-func (_mock *MockSubscriptionService) CreateSubscription(request dto.CreateSubscriptionRequests) (uuid.UUID, error) {
+func (_mock *MockSubscriptionService) CreateSubscription(request dto.CreateSubscriptionCommand) (uuid.UUID, error) {
 	ret := _mock.Called(request)
 
 	if len(ret) == 0 {
@@ -107,17 +107,17 @@ func (_mock *MockSubscriptionService) CreateSubscription(request dto.CreateSubsc
 
 	var r0 uuid.UUID
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(dto.CreateSubscriptionRequests) (uuid.UUID, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(dto.CreateSubscriptionCommand) (uuid.UUID, error)); ok {
 		return returnFunc(request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(dto.CreateSubscriptionRequests) uuid.UUID); ok {
+	if returnFunc, ok := ret.Get(0).(func(dto.CreateSubscriptionCommand) uuid.UUID); ok {
 		r0 = returnFunc(request)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(uuid.UUID)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(dto.CreateSubscriptionRequests) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(dto.CreateSubscriptionCommand) error); ok {
 		r1 = returnFunc(request)
 	} else {
 		r1 = ret.Error(1)
@@ -131,16 +131,16 @@ type MockSubscriptionService_CreateSubscription_Call struct {
 }
 
 // CreateSubscription is a helper method to define mock.On call
-//   - request dto.CreateSubscriptionRequests
+//   - request dto.CreateSubscriptionCommand
 func (_e *MockSubscriptionService_Expecter) CreateSubscription(request interface{}) *MockSubscriptionService_CreateSubscription_Call {
 	return &MockSubscriptionService_CreateSubscription_Call{Call: _e.mock.On("CreateSubscription", request)}
 }
 
-func (_c *MockSubscriptionService_CreateSubscription_Call) Run(run func(request dto.CreateSubscriptionRequests)) *MockSubscriptionService_CreateSubscription_Call {
+func (_c *MockSubscriptionService_CreateSubscription_Call) Run(run func(request dto.CreateSubscriptionCommand)) *MockSubscriptionService_CreateSubscription_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 dto.CreateSubscriptionRequests
+		var arg0 dto.CreateSubscriptionCommand
 		if args[0] != nil {
-			arg0 = args[0].(dto.CreateSubscriptionRequests)
+			arg0 = args[0].(dto.CreateSubscriptionCommand)
 		}
 		run(
 			arg0,
@@ -154,7 +154,7 @@ func (_c *MockSubscriptionService_CreateSubscription_Call) Return(uUID uuid.UUID
 	return _c
 }
 
-func (_c *MockSubscriptionService_CreateSubscription_Call) RunAndReturn(run func(request dto.CreateSubscriptionRequests) (uuid.UUID, error)) *MockSubscriptionService_CreateSubscription_Call {
+func (_c *MockSubscriptionService_CreateSubscription_Call) RunAndReturn(run func(request dto.CreateSubscriptionCommand) (uuid.UUID, error)) *MockSubscriptionService_CreateSubscription_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -211,22 +211,22 @@ func (_c *MockSubscriptionService_DeleteSubscription_Call) RunAndReturn(run func
 }
 
 // GetSubscription provides a mock function for the type MockSubscriptionService
-func (_mock *MockSubscriptionService) GetSubscription(id uuid.UUID) (dto.SubscriptionResponse, error) {
+func (_mock *MockSubscriptionService) GetSubscription(id uuid.UUID) (dto.SubscriptionDTO, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetSubscription")
 	}
 
-	var r0 dto.SubscriptionResponse
+	var r0 dto.SubscriptionDTO
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) (dto.SubscriptionResponse, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) (dto.SubscriptionDTO, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) dto.SubscriptionResponse); ok {
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) dto.SubscriptionDTO); ok {
 		r0 = returnFunc(id)
 	} else {
-		r0 = ret.Get(0).(dto.SubscriptionResponse)
+		r0 = ret.Get(0).(dto.SubscriptionDTO)
 	}
 	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
 		r1 = returnFunc(id)
@@ -260,34 +260,34 @@ func (_c *MockSubscriptionService_GetSubscription_Call) Run(run func(id uuid.UUI
 	return _c
 }
 
-func (_c *MockSubscriptionService_GetSubscription_Call) Return(subscriptionResponse dto.SubscriptionResponse, err error) *MockSubscriptionService_GetSubscription_Call {
+func (_c *MockSubscriptionService_GetSubscription_Call) Return(subscriptionResponse dto.SubscriptionDTO, err error) *MockSubscriptionService_GetSubscription_Call {
 	_c.Call.Return(subscriptionResponse, err)
 	return _c
 }
 
-func (_c *MockSubscriptionService_GetSubscription_Call) RunAndReturn(run func(id uuid.UUID) (dto.SubscriptionResponse, error)) *MockSubscriptionService_GetSubscription_Call {
+func (_c *MockSubscriptionService_GetSubscription_Call) RunAndReturn(run func(id uuid.UUID) (dto.SubscriptionDTO, error)) *MockSubscriptionService_GetSubscription_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // ListSubscriptions provides a mock function for the type MockSubscriptionService
-func (_mock *MockSubscriptionService) ListSubscriptions(filter dto.SubscriptionFilter) ([]dto.SubscriptionResponse, error) {
+func (_mock *MockSubscriptionService) ListSubscriptions(filter dto.SubscriptionFilter) ([]dto.SubscriptionDTO, error) {
 	ret := _mock.Called(filter)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListSubscriptions")
 	}
 
-	var r0 []dto.SubscriptionResponse
+	var r0 []dto.SubscriptionDTO
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(dto.SubscriptionFilter) ([]dto.SubscriptionResponse, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(dto.SubscriptionFilter) ([]dto.SubscriptionDTO, error)); ok {
 		return returnFunc(filter)
 	}
-	if returnFunc, ok := ret.Get(0).(func(dto.SubscriptionFilter) []dto.SubscriptionResponse); ok {
+	if returnFunc, ok := ret.Get(0).(func(dto.SubscriptionFilter) []dto.SubscriptionDTO); ok {
 		r0 = returnFunc(filter)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]dto.SubscriptionResponse)
+			r0 = ret.Get(0).([]dto.SubscriptionDTO)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(dto.SubscriptionFilter) error); ok {
@@ -322,18 +322,18 @@ func (_c *MockSubscriptionService_ListSubscriptions_Call) Run(run func(filter dt
 	return _c
 }
 
-func (_c *MockSubscriptionService_ListSubscriptions_Call) Return(subscriptionResponses []dto.SubscriptionResponse, err error) *MockSubscriptionService_ListSubscriptions_Call {
+func (_c *MockSubscriptionService_ListSubscriptions_Call) Return(subscriptionResponses []dto.SubscriptionDTO, err error) *MockSubscriptionService_ListSubscriptions_Call {
 	_c.Call.Return(subscriptionResponses, err)
 	return _c
 }
 
-func (_c *MockSubscriptionService_ListSubscriptions_Call) RunAndReturn(run func(filter dto.SubscriptionFilter) ([]dto.SubscriptionResponse, error)) *MockSubscriptionService_ListSubscriptions_Call {
+func (_c *MockSubscriptionService_ListSubscriptions_Call) RunAndReturn(run func(filter dto.SubscriptionFilter) ([]dto.SubscriptionDTO, error)) *MockSubscriptionService_ListSubscriptions_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // UpdateSubscription provides a mock function for the type MockSubscriptionService
-func (_mock *MockSubscriptionService) UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionRequests) error {
+func (_mock *MockSubscriptionService) UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionCommand) error {
 	ret := _mock.Called(id, request)
 
 	if len(ret) == 0 {
@@ -341,7 +341,7 @@ func (_mock *MockSubscriptionService) UpdateSubscription(id uuid.UUID, request d
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID, dto.UpdateSubscriptionRequests) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID, dto.UpdateSubscriptionCommand) error); ok {
 		r0 = returnFunc(id, request)
 	} else {
 		r0 = ret.Error(0)
@@ -356,20 +356,20 @@ type MockSubscriptionService_UpdateSubscription_Call struct {
 
 // UpdateSubscription is a helper method to define mock.On call
 //   - id uuid.UUID
-//   - request dto.UpdateSubscriptionRequests
+//   - request dto.UpdateSubscriptionCommand
 func (_e *MockSubscriptionService_Expecter) UpdateSubscription(id interface{}, request interface{}) *MockSubscriptionService_UpdateSubscription_Call {
 	return &MockSubscriptionService_UpdateSubscription_Call{Call: _e.mock.On("UpdateSubscription", id, request)}
 }
 
-func (_c *MockSubscriptionService_UpdateSubscription_Call) Run(run func(id uuid.UUID, request dto.UpdateSubscriptionRequests)) *MockSubscriptionService_UpdateSubscription_Call {
+func (_c *MockSubscriptionService_UpdateSubscription_Call) Run(run func(id uuid.UUID, request dto.UpdateSubscriptionCommand)) *MockSubscriptionService_UpdateSubscription_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 uuid.UUID
 		if args[0] != nil {
 			arg0 = args[0].(uuid.UUID)
 		}
-		var arg1 dto.UpdateSubscriptionRequests
+		var arg1 dto.UpdateSubscriptionCommand
 		if args[1] != nil {
-			arg1 = args[1].(dto.UpdateSubscriptionRequests)
+			arg1 = args[1].(dto.UpdateSubscriptionCommand)
 		}
 		run(
 			arg0,
@@ -384,7 +384,7 @@ func (_c *MockSubscriptionService_UpdateSubscription_Call) Return(err error) *Mo
 	return _c
 }
 
-func (_c *MockSubscriptionService_UpdateSubscription_Call) RunAndReturn(run func(id uuid.UUID, request dto.UpdateSubscriptionRequests) error) *MockSubscriptionService_UpdateSubscription_Call {
+func (_c *MockSubscriptionService_UpdateSubscription_Call) RunAndReturn(run func(id uuid.UUID, request dto.UpdateSubscriptionCommand) error) *MockSubscriptionService_UpdateSubscription_Call {
 	_c.Call.Return(run)
 	return _c
 }

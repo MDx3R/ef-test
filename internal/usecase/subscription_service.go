@@ -9,10 +9,10 @@ import (
 )
 
 type SubscriptionService interface {
-	GetSubscription(id uuid.UUID) (dto.SubscriptionResponse, error)
-	ListSubscriptions(filter dto.SubscriptionFilter) ([]dto.SubscriptionResponse, error)
-	CreateSubscription(request dto.CreateSubscriptionRequests) (uuid.UUID, error)
-	UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionRequests) error
+	GetSubscription(id uuid.UUID) (dto.SubscriptionDTO, error)
+	ListSubscriptions(filter dto.SubscriptionFilter) ([]dto.SubscriptionDTO, error)
+	CreateSubscription(request dto.CreateSubscriptionCommand) (uuid.UUID, error)
+	UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionCommand) error
 	DeleteSubscription(id uuid.UUID) error
 	CalculateTotalCost(filter dto.TotalCostFilter) (int, error)
 }
@@ -25,21 +25,21 @@ func NewSubscriptionService(subRepo SubscriptionRepository) SubscriptionService 
 	return &subscriptionService{subRepo: subRepo}
 }
 
-func (s *subscriptionService) GetSubscription(id uuid.UUID) (dto.SubscriptionResponse, error) {
+func (s *subscriptionService) GetSubscription(id uuid.UUID) (dto.SubscriptionDTO, error) {
 	sub, err := s.subRepo.Get(id)
 	if err != nil {
-		return dto.SubscriptionResponse{}, err
+		return dto.SubscriptionDTO{}, err
 	}
 	return dto.FromSubscription(sub), nil
 }
 
-func (s *subscriptionService) ListSubscriptions(filter dto.SubscriptionFilter) ([]dto.SubscriptionResponse, error) {
+func (s *subscriptionService) ListSubscriptions(filter dto.SubscriptionFilter) ([]dto.SubscriptionDTO, error) {
 	subs, err := s.subRepo.List(filter)
 	if err != nil {
-		return []dto.SubscriptionResponse{}, err
+		return []dto.SubscriptionDTO{}, err
 	}
 
-	result := make([]dto.SubscriptionResponse, len(subs))
+	result := make([]dto.SubscriptionDTO, len(subs))
 	for i, sub := range subs {
 		result[i] = dto.FromSubscription(sub)
 	}
@@ -47,13 +47,13 @@ func (s *subscriptionService) ListSubscriptions(filter dto.SubscriptionFilter) (
 	return result, nil
 }
 
-func (s *subscriptionService) CreateSubscription(request dto.CreateSubscriptionRequests) (uuid.UUID, error) {
+func (s *subscriptionService) CreateSubscription(request dto.CreateSubscriptionCommand) (uuid.UUID, error) {
 	sub, err := entity.NewSubscription(
 		request.ServiceName,
 		request.UserID,
 		request.Price,
-		request.StartDate.ToTime(),
-		request.EndDate.ToTimePtr(),
+		request.StartDate,
+		request.EndDate,
 	)
 	if err != nil {
 		return uuid.Nil, err
@@ -65,7 +65,7 @@ func (s *subscriptionService) CreateSubscription(request dto.CreateSubscriptionR
 	return sub.ID(), nil
 }
 
-func (s *subscriptionService) UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionRequests) error {
+func (s *subscriptionService) UpdateSubscription(id uuid.UUID, request dto.UpdateSubscriptionCommand) error {
 	sub, err := s.subRepo.Get(id)
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (s *subscriptionService) UpdateSubscription(id uuid.UUID, request dto.Updat
 
 	sub.SetServiceName(request.ServiceName)
 	sub.SetPrice(request.Price)
-	if err := sub.SetStartEndDate(request.StartDate.ToTime(), request.EndDate.ToTimePtr()); err != nil {
+	if err := sub.SetStartEndDate(request.StartDate, request.EndDate); err != nil {
 		return err
 	}
 

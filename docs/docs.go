@@ -31,6 +31,12 @@ const docTemplate = `{
                 "summary": "Список подписок",
                 "parameters": [
                     {
+                        "type": "string",
+                        "example": "09-2025",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "page",
                         "in": "query"
@@ -47,7 +53,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "uuid.UUID type not supported for form",
+                        "example": "08-2025",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "user_id",
                         "in": "query"
                     }
@@ -65,13 +76,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Ошибка валидации параметров запроса",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -95,7 +106,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateSubscriptionRequests"
+                            "$ref": "#/definitions/dto.CreateSubscriptionRequest"
                         }
                     }
                 ],
@@ -103,25 +114,25 @@ const docTemplate = `{
                     "201": {
                         "description": "ID созданной подписки",
                         "schema": {
-                            "$ref": "#/definitions/response.IDResponse"
+                            "$ref": "#/definitions/dto.IDResponse"
                         }
                     },
                     "400": {
                         "description": "Неверный запрос",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Ошибка валидации",
                         "schema": {
-                            "$ref": "#/definitions/response.ValidationErrorResponse"
+                            "$ref": "#/definitions/dto.ValidationErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -140,13 +151,26 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "09-2025",
+                        "name": "period_end",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "08-2025",
+                        "name": "period_start",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "name": "service_name",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "uuid.UUID type not supported for form",
                         "name": "user_id",
                         "in": "query",
                         "required": true
@@ -156,19 +180,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Результат расчета стоимости",
                         "schema": {
-                            "$ref": "#/definitions/response.IntResponse"
+                            "$ref": "#/definitions/dto.IntResponse"
                         }
                     },
                     "400": {
                         "description": "Ошибка валидации параметров запроса",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -204,19 +228,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Неверный UUID",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Подписка не найдена",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -248,7 +272,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateSubscriptionRequests"
+                            "$ref": "#/definitions/dto.UpdateSubscriptionRequest"
                         }
                     }
                 ],
@@ -259,25 +283,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Неверный UUID или данные запроса",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Подписка не найдена",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Ошибка валидации",
                         "schema": {
-                            "$ref": "#/definitions/response.ValidationErrorResponse"
+                            "$ref": "#/definitions/dto.ValidationErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -305,19 +329,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Неверный UUID",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Подписка не найдена",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -325,7 +349,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.CreateSubscriptionRequests": {
+        "dto.CreateSubscriptionRequest": {
             "type": "object",
             "required": [
                 "price",
@@ -335,7 +359,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "end_date": {
-                    "$ref": "#/definitions/model.MonthYear"
+                    "type": "string"
                 },
                 "price": {
                     "type": "integer"
@@ -344,67 +368,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "start_date": {
-                    "$ref": "#/definitions/model.MonthYear"
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "string"
                 }
             }
         },
-        "dto.SubscriptionResponse": {
-            "type": "object",
-            "properties": {
-                "end_date": {
-                    "$ref": "#/definitions/model.MonthYear"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "service_name": {
-                    "type": "string"
-                },
-                "start_date": {
-                    "$ref": "#/definitions/model.MonthYear"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.UpdateSubscriptionRequests": {
-            "type": "object",
-            "required": [
-                "price",
-                "service_name",
-                "start_date"
-            ],
-            "properties": {
-                "end_date": {
-                    "$ref": "#/definitions/model.MonthYear"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "service_name": {
-                    "type": "string"
-                },
-                "start_date": {
-                    "$ref": "#/definitions/model.MonthYear"
-                }
-            }
-        },
-        "model.MonthYear": {
-            "type": "object",
-            "properties": {
-                "time.Time": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.ErrorResponse": {
+        "dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -413,23 +384,76 @@ const docTemplate = `{
                 }
             }
         },
-        "response.IDResponse": {
+        "dto.IDResponse": {
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "dto.IntResponse": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "integer",
+                    "example": 999
+                }
+            }
+        },
+        "dto.SubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string",
+                    "example": "09-2025"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "price": {
+                    "type": "integer",
+                    "example": 999
+                },
+                "service_name": {
+                    "type": "string",
+                    "example": "Netflix"
+                },
+                "start_date": {
+                    "type": "string",
+                    "example": "08-2025"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "dto.UpdateSubscriptionRequest": {
+            "type": "object",
+            "required": [
+                "price",
+                "service_name",
+                "start_date"
+            ],
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "start_date": {
                     "type": "string"
                 }
             }
         },
-        "response.IntResponse": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "integer"
-                }
-            }
-        },
-        "response.ValidationErrorResponse": {
+        "dto.ValidationErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {

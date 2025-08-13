@@ -1,61 +1,60 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/MDx3R/ef-test/internal/domain/entity"
-	"github.com/MDx3R/ef-test/internal/usecase/model"
 	"github.com/google/uuid"
 )
 
-type SubscriptionResponse struct {
-	ID          uuid.UUID        `json:"id"`
-	ServiceName string           `json:"service_name"`
-	Price       int              `json:"price"`
-	UserID      uuid.UUID        `json:"user_id"`
-	StartDate   model.MonthYear  `json:"start_date"`
-	EndDate     *model.MonthYear `json:"end_date,omitempty"`
+type SubscriptionDTO struct {
+	ID          uuid.UUID
+	ServiceName string
+	Price       int
+	UserID      uuid.UUID
+	StartDate   time.Time
+	EndDate     *time.Time
 }
 
-type CreateSubscriptionRequests struct {
-	ServiceName string           `json:"service_name" binding:"required"`
-	Price       int              `json:"price" binding:"required"`
-	UserID      uuid.UUID        `json:"user_id" binding:"required"`
-	StartDate   *model.MonthYear `json:"start_date" binding:"required"`
-	EndDate     *model.MonthYear `json:"end_date,omitempty"`
+type CreateSubscriptionCommand struct {
+	ServiceName string
+	Price       int
+	UserID      uuid.UUID
+	StartDate   time.Time
+	EndDate     *time.Time
 }
 
-type UpdateSubscriptionRequests struct {
-	ServiceName string           `json:"service_name" binding:"required"`
-	Price       int              `json:"price" binding:"required"`
-	StartDate   *model.MonthYear `json:"start_date" binding:"required"`
-	EndDate     *model.MonthYear `json:"end_date,omitempty"`
+type UpdateSubscriptionCommand struct {
+	ServiceName string
+	Price       int
+	StartDate   time.Time
+	EndDate     *time.Time
 }
 
 type SubscriptionFilter struct {
-	// uuid.UUID type not supported for form
-	UserID      *string          `form:"user_id" binding:"omitempty,uuid"`
-	ServiceName *string          `form:"service_name"`
-	StartDate   *model.MonthYear `form:"start_date"`
-	EndDate     *model.MonthYear `form:"end_date"`
+	UserID      *uuid.UUID
+	ServiceName *string
+	StartDate   *time.Time
+	EndDate     *time.Time
 
-	Page     int `form:"page,default=1,gte=1"`
-	PageSize int `form:"page_size,default=20,gte=1"`
+	Page     int
+	PageSize int
 }
 
 type TotalCostFilter struct {
-	// uuid.UUID type not supported for form
-	UserID      string           `form:"user_id" binding:"required,uuid"`
-	ServiceName string           `form:"service_name" binding:"required"`
-	PeriodStart *model.MonthYear `form:"period_start" binding:"required"`
-	PeriodEnd   *model.MonthYear `form:"period_end" binding:"required"`
+	UserID      uuid.UUID
+	ServiceName string
+	PeriodStart time.Time
+	PeriodEnd   time.Time
 }
 
-func FromSubscription(sub *entity.Subscription) SubscriptionResponse {
-	return SubscriptionResponse{
+func FromSubscription(sub *entity.Subscription) SubscriptionDTO {
+	return SubscriptionDTO{
 		ID:          sub.ID(),
 		ServiceName: sub.ServiceName(),
 		Price:       sub.Price(),
 		UserID:      sub.UserID(),
-		StartDate:   model.NewMonthYear(sub.StartDate()),
-		EndDate:     model.NewMonthYearFromPtr(sub.EndDate()),
+		StartDate:   sub.StartDate(),
+		EndDate:     sub.EndDate(),
 	}
 }
