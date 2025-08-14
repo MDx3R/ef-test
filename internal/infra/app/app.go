@@ -7,8 +7,10 @@ import (
 	"github.com/MDx3R/ef-test/internal/config"
 	"github.com/MDx3R/ef-test/internal/infra/database/gorm"
 	ginserver "github.com/MDx3R/ef-test/internal/infra/server/gin"
+	ginware "github.com/MDx3R/ef-test/internal/infra/server/gin/middleware"
 	handlers "github.com/MDx3R/ef-test/internal/transport/http/gin"
 	"github.com/MDx3R/ef-test/internal/usecase"
+	"github.com/gin-gonic/gin"
 
 	"github.com/sirupsen/logrus"
 )
@@ -40,6 +42,12 @@ func NewApp(cfg *config.Config, logger *logrus.Logger) *App {
 
 	ginserver.SetMode(cfg)
 	server := ginserver.New(&cfg.Server)
+
+	server.UseMiddleware(
+		ginware.NewCORSMiddleware(&cfg.Server.CORS),
+		gin.Recovery(),
+		ginware.LoggerMiddleware(logger),
+	)
 
 	server.RegisterSwagger()
 	server.RegisterSubscriptionHandler(subHandler)
