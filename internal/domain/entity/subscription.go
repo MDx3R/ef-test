@@ -120,7 +120,7 @@ func NewSubscriptionWithID(
 }
 
 func validateTime(startDate time.Time, endDate *time.Time) error {
-	if endDate != nil && startDate.After(*endDate) {
+	if endDate != nil && (*endDate).Before(startDate) {
 		return domain.ErrInvalidPeriod
 	}
 	return nil

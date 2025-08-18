@@ -394,32 +394,111 @@ func TestGormSubscriptionRepository_Delete(t *testing.T) {
 	assert.ErrorIs(t, errGet, usecase.ErrNotFound)
 }
 
-func TestGormSubscriptionRepository_CalculateTotalCost(t *testing.T) {
+func TestGormSubscriptionRepository_CalculateTotalCost_MultipleCases(t *testing.T) {
 	clearTable(t)
 
-	// Arrange
 	userID := uuid.New()
-	sub1, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceA", userID, 100, time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC), nil)
-	sub2, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceA", userID, 150, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), nil)
-	sub3, _ := entity.NewSubscriptionWithID(uuid.New(), "serviceB", userID, 200, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), nil)
+	now := time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC)
 
-	assert.NoError(t, repo.Add(sub1))
-	assert.NoError(t, repo.Add(sub2))
-	assert.NoError(t, repo.Add(sub3))
+	// Подписки для serviceA
+	endJune := time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC)
+	endJuly := time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC)
 
-	startDate := time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC)
-	endDate := time.Date(2025, 8, 31, 23, 59, 59, 0, time.UTC)
-	filter := dto.TotalCostFilter{
-		UserID:      userID,
-		ServiceName: "serviceA",
-		PeriodStart: startDate,
-		PeriodEnd:   endDate,
+	cases := []struct {
+		name        string
+		subs        []*entity.Subscription
+		filter      dto.TotalCostFilter
+		expectedSum int
+	}{
+		{
+			name: "basic overlap",
+			subs: []*entity.Subscription{
+				mustSub("serviceA", userID, 100, time.Date(2025, 7, 1, 0, 0, 0, 0, time.UTC), nil),
+				mustSub("serviceA", userID, 150, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), nil),
+				mustSub("serviceA", userID, 200, time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC), &endJune),
+				mustSub("serviceB", userID, 300, time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC), nil),
+			},
+			filter: dto.TotalCostFilter{
+				UserID:      userID,
+				ServiceName: "serviceA",
+				PeriodStart: now,
+				PeriodEnd:   time.Date(2025, 8, 1, 0, 0, 0, 0, time.UTC),
+			},
+			expectedSum: 350, // 100*2 (sub1) + 150*1 (sub2)
+		},
+		{
+			name: "subscription fully before period",
+			subs: []*entity.Subscription{
+				mustSub("serviceA", userID, 200, time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC), &endJune),
+			},
+			filter: dto.TotalCostFilter{
+				UserID:      userID,
+				ServiceName: "serviceA",
+				PeriodStart: now,
+				PeriodEnd:   time.Date(2025, 7, 31, 0, 0, 0, 0, time.UTC),
+			},
+			expectedSum: 0,
+		},
+		{
+			name: "subscription fully after period",
+			subs: []*entity.Subscription{
+				mustSub("serviceA", userID, 200, time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC), nil),
+			},
+			filter: dto.TotalCostFilter{
+				UserID:      userID,
+				ServiceName: "serviceA",
+				PeriodStart: now,
+				PeriodEnd:   time.Date(2025, 8, 31, 0, 0, 0, 0, time.UTC),
+			},
+			expectedSum: 0,
+		},
+		{
+			name: "subscription partially overlaps period",
+			subs: []*entity.Subscription{
+				mustSub("serviceA", userID, 100, time.Date(2025, 6, 15, 0, 0, 0, 0, time.UTC), &endJuly), // June-July
+				mustSub("serviceA", userID, 150, time.Date(2025, 8, 15, 0, 0, 0, 0, time.UTC), nil),      // starts mid-August
+			},
+			filter: dto.TotalCostFilter{
+				UserID:      userID,
+				ServiceName: "serviceA",
+				PeriodStart: now,
+				PeriodEnd:   time.Date(2025, 8, 31, 0, 0, 0, 0, time.UTC),
+			},
+			expectedSum: 250, // sub1: July=100, sub2: Aug=150
+		},
+		{
+			name: "subscription with nil end date",
+			subs: []*entity.Subscription{
+				mustSub("serviceA", userID, 120, time.Date(2025, 7, 10, 0, 0, 0, 0, time.UTC), nil),
+			},
+			filter: dto.TotalCostFilter{
+				UserID:      userID,
+				ServiceName: "serviceA",
+				PeriodStart: now,
+				PeriodEnd:   time.Date(2025, 7, 31, 0, 0, 0, 0, time.UTC),
+			},
+			expectedSum: 120, // July
+		},
 	}
 
-	// Act
-	total, err := repo.CalculateTotalCost(filter)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			clearTable(t)
+			for _, s := range tc.subs {
+				assert.NoError(t, repo.Add(s))
+			}
 
-	// Assert
-	assert.NoError(t, err)
-	assert.Equal(t, 250, total) // sub1 + sub2
+			total, err := repo.CalculateTotalCost(tc.filter)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expectedSum, total)
+		})
+	}
+}
+
+func mustSub(service string, userID uuid.UUID, price int, start time.Time, end *time.Time) *entity.Subscription {
+	sub, err := entity.NewSubscriptionWithID(uuid.New(), service, userID, price, start, end)
+	if err != nil {
+		panic(err)
+	}
+	return sub
 }

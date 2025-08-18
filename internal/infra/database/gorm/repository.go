@@ -101,17 +101,40 @@ func (r *gormSubscriptionRepository) Delete(id uuid.UUID) error {
 func (r *gormSubscriptionRepository) CalculateTotalCost(filter dto.TotalCostFilter) (int, error) {
 	var result int
 
-	// Calculate the total subscription cost for the given user and service,
-	// considering only subscriptions whose start_date falls within the specified period.
-	stmt := r.tx.Model(&gormmodel.SubscriptionModel{}).Select("sum(price)")
+	stmt := r.tx.Model(&gormmodel.SubscriptionModel{}).Select(`
+		COALESCE(
+			SUM(
+				price * (
+					EXTRACT(
+						YEAR FROM AGE(
+							LEAST(end_date, ?),
+							GREATEST(start_date, ?)
+						)
+					) * 12
+					+ EXTRACT(
+						MONTH FROM AGE(
+							LEAST(end_date, ?),
+							GREATEST(start_date, ?)
+						)
+					)
+					+ 1
+				)
+			), 0
+		)
+	`, filter.PeriodEnd, filter.PeriodStart, filter.PeriodEnd, filter.PeriodStart)
+
 	stmt = stmt.Where("user_id = ?", filter.UserID)
 	stmt = stmt.Where("service_name = ?", filter.ServiceName)
-	stmt = stmt.Where("start_date BETWEEN ? AND ?", filter.PeriodStart, filter.PeriodEnd)
+	stmt = stmt.Where(`
+		start_date <= ?
+		AND (end_date IS NULL OR end_date >= ?)
+	`, filter.PeriodEnd, filter.PeriodStart)
 
 	err := stmt.Scan(&result).Error
 	if err != nil {
 		return 0, wrap(usecase.ErrRepository, err)
 	}
+
 	return result, nil
 }
 
