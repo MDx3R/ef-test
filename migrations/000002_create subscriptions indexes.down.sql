@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS idx_subscriptions_user_service_start_end;
+
+DROP INDEX IF EXISTS idx_subscriptions_user_service_start_active;
